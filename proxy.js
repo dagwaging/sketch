@@ -1,4 +1,4 @@
-var http = require('follow-redirects').http;
+var http = require('http');
 var url = require('url');
 
 module.exports = function(req, res) {
@@ -6,7 +6,6 @@ module.exports = function(req, res) {
 	
 	var headers = req.headers;
 	headers['host'] = proxyUrl.host;
-	delete headers.referer;
     
     var proxyReq = http.request({
         host: proxyUrl.host,
@@ -14,11 +13,7 @@ module.exports = function(req, res) {
         method: req.method,
 		headers: headers
     }, function(proxyRes) {
-        var headers = proxyRes.headers;
-        headers['Access-Control-Allow-Origin'] = '*';
-        headers['Access-Control-Allow-Headers'] = 'X-Requested-With';
-        
-        res.writeHead(proxyRes.statusCode, headers);
+        res.writeHead(proxyRes.statusCode, proxyRes.headers);
         
         proxyRes.on('data', function(chunk) {
             res.write(chunk);

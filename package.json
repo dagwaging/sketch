@@ -6,7 +6,6 @@
   "repository": "",
   "author": "dagwaging@gmail.com",
   "dependencies": {
-    "express": "4.x",
-    "follow-redirects": "0.x"
+    "express": "4.x"
   }
 }
