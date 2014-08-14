@@ -1,0 +1,8 @@
+#canvas {
+  outline: 1px solid black;
+  background: white;
+}
+
+#count, #stats {
+  display: inline-block;
+}

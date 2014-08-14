@@ -1,0 +1,12 @@
+{
+  "name": "sketch",
+  "version": "0.0.0",
+  "description": "An html5 client for garyc.me/sketch",
+  "main": "server.js",
+  "repository": "",
+  "author": "dagwaging@gmail.com",
+  "dependencies": {
+    "express": "4.x",
+    "follow-redirects": "0.x"
+  }
+}
