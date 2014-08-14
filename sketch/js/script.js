@@ -54,7 +54,7 @@ $(document).ready(function() {
     console.log(data);
     
     $.ajax({
-      url: "./proxy/" + encodeURIComponent("http://www.garyc.me/sketch/swap.php?v=32"),
+      url: "./proxy/" + encodeURIComponent("http://garyc.me/sketch/swap.php?v=32"),
       method: "POST",
       data: data
     });
