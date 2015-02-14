@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="//code.jquery.com/jquery-2.1.0.min.js"></script>
   <meta charset="utf-8">
   <title>Sketch</title>
   <link rel="stylesheet" type="text/css" href="css/style.css" />
@@ -9,15 +8,48 @@
   <script type="text/javascript" src="js/script.js"></script>
 </head>
 <body>
-  <canvas id="canvas" width="800px" height="600px">
-  </canvas>
+  <h1>yeah so i'm probably gonna take this down because nobody uses it</h1>
+  <canvas id="overlay" width="800px" height="600px" z-index=1></canvas>
+  <canvas id="canvas" width="800px" height="600px"></canvas>
+  <form id="save" action="./download/sketch.png" method="POST">
+    <input type="hidden" id="data" name="data" />
+    <button type="submit">save</button>
+  </form>
   <div id="controls">
-    <button id="reset">reset</button>
-    <button id="undo">undo</button>
+    <div>
+      <button class="button" id="reset">reset</button>
+      <button class="button" id="undo">undo</button>
+      <br />
+      <button class="button" id="gallery">view the sketch gallery</button>
+    </div>
     <div id="count">Ink used: 0%</div>
-    <button id="swap">swap!</button>
-    <progress id="progress"></progress>
-    <div id="stats">In the past 5 minutes<br />0 sketches were swapped by<br />0 artists. There were also<br />0 people who only peeked.</div>
+    <div>
+      <button class="button" id="swap">swap!</button>
+      <div id="progress"><progress max=100 ></progress></div>
+      <br />
+      <button class="button" id="peek">peek at latest sketch swapped on server</button>
+    </div>
+    <div id="stats">
+    In the past 5 minutes<br />
+    <strong>0</strong> sketches were swapped by<br />
+    <strong>0</strong> different artists. There were also<br />
+    <strong>0</strong> people who only peeked.
+    </div>
   </div>
+  <div>
+    <h4>Upcoming features:</h4>
+    <ul>
+      <li><del>Show the sketch you swapped with</del></li>
+      <li><del>Show swaps/artists/peekers</del></li>
+      <li><del>Save sketch</del></li>
+      <li><del>Peek</del></li>
+      <li>Right click to erase (kind of done)</li>
+      <li><del>Alternate DBs</del> (add ?db=2 for example to the end of the url)</li>
+      <li>Swap progress indicator</li>
+      <li>Zoom</li>
+      <li>Full gallery with playback and saving</li>
+    </ul>
+  </div>
+  <iframe id="download" style="display: none" frameborder="0"></iframe>
 </body>
 </html>
