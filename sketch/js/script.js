@@ -116,8 +116,13 @@ $(document).ready(function() {
   }
   
   function beginLine(e) {
-    e.offsetX = e.offsetX || e.pageX - $(e.target).offset().left;
-    e.offsetY = e.offsetY || e.pageY - $(e.target).offset().left;
+    if(e.which == 0) {
+      e.offsetX = e.originalEvent.touches[0].pageX - $(e.target).offset().left;
+      e.offsetY = e.originalEvent.touches[0].pageY - $(e.target).offset().top;
+    } else {
+      e.offsetX = e.offsetX || e.pageX - $(e.target).offset().left;
+      e.offsetY = e.offsetY || e.pageY - $(e.target).offset().top;
+    }
     
     var pointX = Math.round(e.offsetX);
     var pointY = Math.round(e.offsetY);
@@ -140,8 +145,13 @@ $(document).ready(function() {
   }
   
   function drawLine(e, line) {
-    e.offsetX = e.offsetX || e.pageX - $(e.target).offset().left;
-    e.offsetY = e.offsetY || e.pageY - $(e.target).offset().left;
+    if(e.which == 0) {
+      e.offsetX = e.originalEvent.touches[0].pageX - $(e.target).offset().left;
+      e.offsetY = e.originalEvent.touches[0].pageY - $(e.target).offset().top;
+    } else {
+      e.offsetX = e.offsetX || e.pageX - $(e.target).offset().left;
+      e.offsetY = e.offsetY || e.pageY - $(e.target).offset().top;
+    }
     
     var pointX = Math.round(e.offsetX);
     var pointY = Math.round(e.offsetY);
@@ -173,7 +183,7 @@ $(document).ready(function() {
     radius = radius || 5;
     
     e.offsetX = e.offsetX || e.pageX - $(e.target).offset().left;
-    e.offsetY = e.offsetY || e.pageY - $(e.target).offset().left;
+    e.offsetY = e.offsetY || e.pageY - $(e.target).offset().top;
     
     for(var j in lines) {
       var line = lines[j];
@@ -224,9 +234,9 @@ $(document).ready(function() {
     }
   }
   
-  canvasElement.on("mousemove.overlay", function(e) {
+  canvasElement.on("mousemove.overlay touchmove.overlay", function(e) {
     e.offsetX = e.offsetX || e.pageX - $(e.target).offset().left;
-    e.offsetY = e.offsetY || e.pageY - $(e.target).offset().left;
+    e.offsetY = e.offsetY || e.pageY - $(e.target).offset().top;
     
     if(erasing) {
       overlay.clearRect(0, 0, 800, 600);
@@ -237,20 +247,20 @@ $(document).ready(function() {
     }
   })
   
-  canvasElement.on("mousedown.sketch", function(e) {
+  canvasElement.on("mousedown.sketch touchstart.sketch", function(e) {
     e.preventDefault();
     
     if(!editable || ink >= 65535) {
       return false;
     }
     
-    if(e.which == 1) {
+    if(e.which == 1 || e.which == 0) {
       overlay.clearRect(0, 0, 800, 600);
       erasing = false;
       
       var line = beginLine(e);
       
-      canvasElement.on("mousemove.sketch", function(e) {
+      canvasElement.on("mousemove.sketch touchmove.sketch", function(e) {
         if(!editable || ink >= 65535) {
           return false;
         }
@@ -267,17 +277,17 @@ $(document).ready(function() {
     else if(e.which == 3) {
       erasing = true;
       
-      canvasElement.on("mousemove.sketch", function(e) {
+      canvasElement.on("mousemove.sketch touchmove.sketch", function(e) {
         eraseLine(e);
         
         return false;
       });
     }
     
-    $(document).one("mouseup.sketch", function(e) {
+    $(document).one("mouseup.sketch touchend.sketch", function(e) {
       e.preventDefault();
       
-      canvasElement.off("mousemove.sketch mouseleave.sketch mouseenter.sketch");
+      canvasElement.off("mousemove.sketch mouseleave.sketch mouseenter.sketch touchmove.sketch");
       
       return false;
     });
