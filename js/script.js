@@ -394,7 +394,7 @@ $(document).ready(function() {
   $("#save").on("submit", function(e) {
     e.preventDefault();
     
-    var img = canvasElement.get()[0].toDataURL("image/png");
+    var img = $("#canvas")[0].toDataURL("image/png");
     
     $("#data").val(img);
     
