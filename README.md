@@ -1,1 +1,0 @@
-Simple html5 client for garyc.me/sketch
