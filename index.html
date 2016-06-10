@@ -1,40 +1,15 @@
-<!DOCTYPE html>
+<!doctype html>
+
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>Sketch</title>
-  <link rel="stylesheet" type="text/css" href="css/style.css" />
-  <script type="text/javascript" src="js/jquery.min.js"></script>
-  <script type="text/javascript" src="js/script.js"></script>
-</head>
-<body>
-  <canvas id="overlay" width="800px" height="600px" z-index=1></canvas>
-  <canvas id="canvas" width="800px" height="600px"></canvas>
-  <form id="save" action="http://cors-dagwaging.rhcloud.com/download/sketch.png" method="POST">
-    <input type="hidden" id="data" name="data" />
-    <button type="submit">save</button>
-  </form>
-  <div id="controls">
-    <div>
-      <button class="button" id="reset">reset</button>
-      <button class="button" id="undo">undo</button>
-      <br />
-      <button class="button" id="gallery">view the sketch gallery</button>
-    </div>
-    <div id="count">Ink used: 0%</div>
-    <div>
-      <button class="button" id="swap">swap!</button>
-      <div id="progress"><progress max=100 ></progress></div>
-      <br />
-      <button class="button" id="peek">peek at latest sketch swapped on server</button>
-    </div>
-    <div id="stats">
-    In the past 5 minutes<br />
-    <strong>0</strong> sketches were swapped by<br />
-    <strong>0</strong> different artists. There were also<br />
-    <strong>0</strong> people who only peeked.
-    </div>
-  </div>
-  <iframe id="download" style="display: none" frameborder="0"></iframe>
-</body>
+  <head>
+    <title>sketch</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/manifest.json">
+    <script src="/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="/src/sketch-app/sketch-app.html">
+  </head>
+  <body>
+    <sketch-app></sketch-app>
+  </body>
 </html>
