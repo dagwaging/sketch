@@ -4,7 +4,8 @@
   "main": "index.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^1.4.0",
-    "paper-toolbar": "PolymerElements/paper-toolbar#^1.1.4"
+    "paper-toolbar": "PolymerElements/paper-toolbar#^1.1.4",
+    "paper-icon-button": "PolymerElements/paper-icon-button#^1.1.1"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
