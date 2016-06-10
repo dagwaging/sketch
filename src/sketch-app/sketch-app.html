@@ -1,5 +1,8 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 
 <dom-module id="sketch-app">
   <template>
@@ -13,14 +16,49 @@
         display: flex;
         flex-direction: column;
       }
+
       .content {
         flex-grow: 1;
+        position: relative;
+      }
+
+      #stats.title {
+        text-align: center;
+        line-height: normal;
+      }
+
+      #stats > div {
+        display: inline-block;
+        margin: 8px;
+      }
+
+      paper-fab {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
       }
     </style>
     <div class="content">
-        <h2>Hello [[prop1]]</h2>
+      <h2>Hello [[prop1]]</h2>
+      <paper-fab title="Swap" icon="send"></paper-fab>
     </div>
-    <paper-toolbar></paper-toolbar>
+    <paper-toolbar>
+      <paper-icon-button title="Reset" icon="delete"></paper-icon-button>
+      <paper-icon-button title="Undo" icon="undo"></paper-icon-button>
+      <div id="stats" class="title">
+        <div id="sketches">
+          0 sketches
+        </div>
+        <div id="artists">
+          0 artists
+        </div>
+        <div id="peekers">
+          0 peekers
+        </div>
+      </div>
+      <paper-icon-button title="View gallery" icon="view-module"></paper-icon-button>
+      <paper-icon-button title="Peek" icon="visibility"></paper-icon-button>
+    </paper-toolbar>
   </template>
 
   <script>
@@ -37,4 +75,4 @@
 
     });
   </script>
-</dom-module>
+<undo/dom-module>
