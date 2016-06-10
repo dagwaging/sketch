@@ -1,3 +1,7 @@
+body {
+  margin: 0;
+}
+
 div {
   font-family: Arial;
   box-sizing: border-box;
