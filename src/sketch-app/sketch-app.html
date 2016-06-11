@@ -22,7 +22,7 @@
       }
 
       #stats.title {
-        text-align: center;
+        @apply(--layout-horizontal);
         line-height: normal;
       }
 
@@ -46,29 +46,65 @@
         width: 100%;
         height: 100%;
       }
+
+      #ink {
+        flex-grow: 1;
+      }
     </style>
     <div class="content">
       <fit-ratio-container ratio="4/3">
         <sketch-canvas id="sketch"></sketch-canvas>
       </fit-ratio-container>
-      <paper-fab title="Swap" icon="send" on-tap="_swap"></paper-fab>
+      <paper-fab
+          id="swap"
+          title="Swap"
+          icon="send"
+          on-tap="_swap"></paper-fab>
     </div>
     <paper-toolbar>
-      <paper-icon-button title="Reset" icon="delete" on-tap="reset"></paper-icon-button>
-      <paper-icon-button title="Undo" icon="undo" on-tap="undo"></paper-icon-button>
+      <paper-icon-button
+          id="reset"
+          title="Reset"
+          icon="delete"
+          on-tap="_reset"></paper-icon-button>
+      <paper-icon-button
+          id="undo"
+          title="Undo"
+          icon="undo"
+          on-tap="_undo"></paper-icon-button>
       <div id="stats" class="title">
+        <div id="ink">0% ink used</div>
         <div id="sketches"></div>
         <div id="artists"></div>
         <div id="peekers"></div>
       </div>
-      <paper-icon-button title="View gallery" icon="view-module" on-tap="_viewGallery"></paper-icon-button>
-      <paper-icon-button title="Peek" icon="visibility" on-tap="_peek"></paper-icon-button>
+      <paper-icon-button
+          id="peek"
+          title="Peek"
+          icon="visibility"
+          on-tap="_peek"></paper-icon-button>
+      <paper-icon-button
+          id="gallery"
+          title="View gallery"
+          icon="view-module"
+          on-tap="_viewGallery"></paper-icon-button>
     </paper-toolbar>
     <iron-ajax
-        id="statsRequest"
+        id="getStatsRequest"
         url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/getStats.php?timespan=300"
         handle-as="text"
         on-response="_onGetStats"></iron-ajax>
+    <iron-ajax
+        id="swapRequest"
+        url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/swap.php?v=32"
+        method="POST"
+        handle-as="text"
+        on-response="_onSwap"></iron-ajax>
+    <iron-ajax
+        id="getRequest"
+        url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/get.php"
+        handle-as="text"
+        on-response="_onGet"></iron-ajax>
   </template>
 
   <script>
@@ -76,9 +112,23 @@
       is: 'sketch-app',
 
       ready: function() {
-        this.$.statsRequest.generateRequest();
-        setInterval(this.$.statsRequest.generateRequest.bind(this.$.statsRequest), 10000);
+        this.$.getStatsRequest.generateRequest();
+        setInterval(this.$.getStatsRequest.generateRequest.bind(this.$.getStatsRequest), 10000);
       },
+
+      // Private methods
+
+      _showSketch: function(id) {
+        this.$.swap.disabled = true;
+        this.$.peek.disabled = true;
+        this.$.undo.disabled = true;
+        this.$.sketch.disabled = true;
+
+        this.$.getRequest.params = { id: id || "" };
+        this.$.getRequest.generateRequest();
+      },
+
+      // Event handlers for ajax
 
       _onGetStats: function(event) {
         var stats = event.detail.response.split(",");
@@ -92,16 +142,70 @@
         this.$.peekers.innerText = peekers + (peekers == 1 ? " peeker" : " peekers");
       },
 
+      _onSwap: function(event) {
+        var id = parseInt(event.detail.response);
+
+        if(id == -1) {
+          this.$.swap.disabled = false;
+          this.$.peek.disabled = false;
+          this.$.undo.disabled = false;
+          this.$.sketch.disabled = false;
+        }
+        else {
+          this.$.swap.disabled = true;
+          this.$.peek.disabled = true;
+          this.$.undo.disabled = true;
+          this.$.sketch.disabled = true;
+
+          this._showSketch(id);
+        }
+      },
+
+      _onGet: function(event) {
+        var sketchData = event.detail.response;
+
+        if(sketchData == "wait") {
+          setTimeout(this.$.getRequest.generateRequest.bind(this.$.getRequest), 3000);
+        }
+        else {
+          this.$.swap.disabled = true;
+          this.$.peek.disabled = false;
+          this.$.undo.disabled = true;
+          this.$.sketch.disabled = true;
+
+          this.$.sketch.data = sketchData;
+          this.$.sketch.play();
+        }
+      },
+
+      // Event handlers for buttons
+
       _swap: function() {
+        this.$.swap.disabled = true;
+        this.$.peek.disabled = true;
+        this.$.undo.disabled = true;
+        this.$.sketch.disabled = true;
+
+        this.$.swapRequest.body = this.$.sketch.data;
+        this.$.swapRequest.generateRequest();
       },
 
       _undo: function() {
+        this.$.sketch.undo();
       },
 
       _reset: function() {
+        this.$.swap.disabled = false;
+        this.$.peek.disabled = false;
+        this.$.undo.disabled = false;
+        this.$.sketch.disabled = false;
+
+        this.$.sketch.stop();
+        this.$.sketch.data = "";
       },
 
       _peek: function() {
+        this._showSketch();
       },
 
       _viewGallery: function() {
