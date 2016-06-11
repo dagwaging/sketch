@@ -1,31 +1,62 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
 
 <dom-module id="fit-ratio-container">
   <template>
     <style>
       :host {
-        display: block;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--layout-center-justified);
+        @apply(--layout-relative);
       }
     </style>
-    <div id="content">
-      <content></content>
-    </div>
+    <content></content>
   </template>
   <script>
     Polymer({
 
       is: 'fit-ratio-container',
 
+      behaviors: [
+        Polymer.IronResizableBehavior
+      ],
+
+      listeners: {
+        'iron-resize': '_onIronResize'
+      },
+
       properties: {
         ratio: {
-          type: Number,
-          value: 1,
-          observer: '_ratioChanged'
+          type: String,
+          value: "1/1",
+          observer: '_onRatioChanged'
         }
       },
 
-      _ratioChanged: function(newValue, oldValue) {
+      _onRatioChanged: function(newValue, oldValue) {
+        var parts = newValue.toString().split("/");
+
+        var width = parseFloat(parts[0]);
+        var height = parseFloat(parts[1] || 1);
+
+        this._ratio = width / height;
+        this._onIronResize();
+      },
+
+      _ratio: 1,
+
+      _onIronResize: function() {
+        var contentWidth = Math.min(this.offsetWidth, this.offsetHeight * this._ratio);
+        var contentHeight = Math.min(this.offsetHeight, this.offsetWidth / this._ratio);
+
+        var horizontalPadding = (this.offsetWidth - contentWidth) / 2.0;
+        var verticalPadding = (this.offsetHeight - contentHeight) / 2.0;
+
+        this.style.paddingLeft = this.style.paddingRight = horizontalPadding + "px";
+        this.style.paddingTop = this.style.paddingBottom = verticalPadding + "px";
       }
     });
   </script>
-<undo/dom-module>
+</dom-module>
