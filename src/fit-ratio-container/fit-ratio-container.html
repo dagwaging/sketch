@@ -1,0 +1,31 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<dom-module id="fit-ratio-container">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <div id="content">
+      <content></content>
+    </div>
+  </template>
+  <script>
+    Polymer({
+
+      is: 'fit-ratio-container',
+
+      properties: {
+        ratio: {
+          type: Number,
+          value: 1,
+          observer: '_ratioChanged'
+        }
+      },
+
+      _ratioChanged: function(newValue, oldValue) {
+      }
+    });
+  </script>
+<undo/dom-module>
