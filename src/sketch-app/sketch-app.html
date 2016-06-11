@@ -1,6 +1,7 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
@@ -50,6 +51,11 @@
       #ink {
         flex-grow: 1;
       }
+
+      #progress {
+        visibility: hidden;
+        top: 0;
+      }
     </style>
     <div class="content">
       <fit-ratio-container ratio="4/3">
@@ -62,6 +68,7 @@
           on-tap="_swap"></paper-fab>
     </div>
     <paper-toolbar>
+      <paper-progress class="fit" id="progress" indeterminate></paper-progress>
       <paper-icon-button
           id="reset"
           title="Reset"
@@ -122,7 +129,11 @@
         this.$.swap.disabled = true;
         this.$.peek.disabled = true;
         this.$.undo.disabled = true;
+        this.$.reset.disabled = true;
         this.$.sketch.disabled = true;
+
+        this.$.progress.value = 0;
+        this.$.progress.style.visibility = "visible";
 
         this.$.getRequest.params = { id: id || "" };
         this.$.getRequest.generateRequest();
@@ -149,14 +160,11 @@
           this.$.swap.disabled = false;
           this.$.peek.disabled = false;
           this.$.undo.disabled = false;
+          this.$.reset.disabled = false;
           this.$.sketch.disabled = false;
+          this.$.progress.style.visibility = "hidden";
         }
         else {
-          this.$.swap.disabled = true;
-          this.$.peek.disabled = true;
-          this.$.undo.disabled = true;
-          this.$.sketch.disabled = true;
-
           this._showSketch(id);
         }
       },
@@ -171,7 +179,9 @@
           this.$.swap.disabled = true;
           this.$.peek.disabled = false;
           this.$.undo.disabled = true;
+          this.$.reset.disabled = false;
           this.$.sketch.disabled = true;
+          this.$.progress.style.visibility = "hidden";
 
           this.$.sketch.data = sketchData;
           this.$.sketch.play();
@@ -184,7 +194,11 @@
         this.$.swap.disabled = true;
         this.$.peek.disabled = true;
         this.$.undo.disabled = true;
+        this.$.reset.disabled = true;
         this.$.sketch.disabled = true;
+
+        this.$.progress.value = 0;
+        this.$.progress.style.visibility = "visible";
 
         this.$.swapRequest.body = this.$.sketch.data;
         this.$.swapRequest.generateRequest();
@@ -198,7 +212,9 @@
         this.$.swap.disabled = false;
         this.$.peek.disabled = false;
         this.$.undo.disabled = false;
+        this.$.reset.disabled = false;
         this.$.sketch.disabled = false;
+        this.$.progress.style.visibility = "hidden";
 
         this.$.sketch.stop();
         this.$.sketch.data = "";
