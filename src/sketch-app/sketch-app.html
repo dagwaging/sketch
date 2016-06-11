@@ -51,18 +51,18 @@
       <fit-ratio-container ratio="4/3">
         <sketch-canvas id="sketch"></sketch-canvas>
       </fit-ratio-container>
-      <paper-fab title="Swap" icon="send"></paper-fab>
+      <paper-fab title="Swap" icon="send" on-tap="_swap"></paper-fab>
     </div>
     <paper-toolbar>
-      <paper-icon-button title="Reset" icon="delete"></paper-icon-button>
-      <paper-icon-button title="Undo" icon="undo"></paper-icon-button>
+      <paper-icon-button title="Reset" icon="delete" on-tap="reset"></paper-icon-button>
+      <paper-icon-button title="Undo" icon="undo" on-tap="undo"></paper-icon-button>
       <div id="stats" class="title">
         <div id="sketches"></div>
         <div id="artists"></div>
         <div id="peekers"></div>
       </div>
-      <paper-icon-button title="View gallery" icon="view-module"></paper-icon-button>
-      <paper-icon-button title="Peek" icon="visibility"></paper-icon-button>
+      <paper-icon-button title="View gallery" icon="view-module" on-tap="_viewGallery"></paper-icon-button>
+      <paper-icon-button title="Peek" icon="visibility" on-tap="_peek"></paper-icon-button>
     </paper-toolbar>
     <iron-ajax
         id="statsRequest"
@@ -90,6 +90,22 @@
         this.$.sketches.innerText = sketches + (sketches == 1 ? " sketch" : " sketches");
         this.$.artists.innerText = artists + (artists == 1 ? " artist" : " artists");
         this.$.peekers.innerText = peekers + (peekers == 1 ? " peeker" : " peekers");
+      },
+
+      _swap: function() {
+      },
+
+      _undo: function() {
+      },
+
+      _reset: function() {
+      },
+
+      _peek: function() {
+      },
+
+      _viewGallery: function() {
+        window.open("http://garyc.me/sketch/gallery.swf");
       }
     });
   </script>
