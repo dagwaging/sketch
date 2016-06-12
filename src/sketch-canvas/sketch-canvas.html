@@ -95,8 +95,35 @@
 
       // Private methods
 
-      _onTrack(event) {
-        // TODO
+      _onTrack: function(event) {
+        if(this.disabled) {
+          return;
+        }
+
+        var x = Math.round(800.0 * event.detail.sourceEvent.offsetX / event.srcElement.offsetWidth);
+        var y = Math.round(600.0 * event.detail.sourceEvent.offsetY / event.srcElement.offsetHeight);
+
+        switch(event.detail.state) {
+          case 'start':
+            this._lines.push([x, y]);
+          case 'track':
+          case 'end':
+            this._addPoint(x, y);
+            break;
+        }
+      },
+
+      _addPoint(x, y) {
+        var lastLine = this._lines[this._lines.length - 1];
+        var lastX = lastLine[lastLine.length - 2];
+        var lastY = lastLine[lastLine.length - 1];
+
+        lastLine.push(x, y);
+
+        this._canvas.beginPath();
+        this._canvas.moveTo(lastX, lastY);
+        this._canvas.lineTo(x, y);
+        this._canvas.stroke();
       },
 
       _render() {
