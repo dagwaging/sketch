@@ -7,12 +7,63 @@
       :host {
         @apply(--shadow-elevation-4dp);
         display: block;
+        cursor: crosshair;
+      }
+
+      #sketchCanvas {
+        width: 100%;
+        height: 100%;
       }
     </style>
+    <canvas id="sketchCanvas" on-track="_onTrack" width="800" height="600"></canvas>
   </template>
   <script>
     Polymer({
-      is: 'sketch-canvas'
+      is: 'sketch-canvas',
+
+      ready: function() {
+        this._canvas = this.$.sketchCanvas.getContext("2d");
+        this._canvas.strokeStyle = "black";
+        this._canvas.lineWidth = 3;
+        this._canvas.lineJoin = "round";
+        this._canvas.lineCap = "round";
+        this._canvas.fillStyle = "white";
+      },
+
+      properties: {
+        data: {
+          type: String,
+          observer: '_onDataChanged'
+        }
+      },
+
+      // Private properties
+
+      _canvas: null,
+
+      // Public methods
+
+      play: function() {
+        // TODO
+      },
+
+      stop: function() {
+        // TODO
+      },
+
+      undo: function() {
+        // TODO
+      },
+
+      // Private methods
+
+      _onTrack(event) {
+        // TODO
+      },
+
+      _onDataChanged(newValue, oldValue) {
+        // TODO
+      }
     });
   </script>
 </dom-module>
