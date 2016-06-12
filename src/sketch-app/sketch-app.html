@@ -79,6 +79,11 @@
           title="Undo"
           icon="undo"
           on-tap="_undo"></paper-icon-button>
+      <paper-icon-button
+          id="redo"
+          title="Redo"
+          icon="redo"
+          on-tap="_redo"></paper-icon-button>
       <div id="stats" class="title">
         <div id="ink">0% ink used</div>
         <div id="sketches"></div>
@@ -160,6 +165,7 @@
           this.$.swap.disabled = false;
           this.$.peek.disabled = false;
           this.$.undo.disabled = false;
+          this.$.redo.disabled = false;
           this.$.reset.disabled = false;
           this.$.sketch.disabled = false;
           this.$.progress.style.visibility = "hidden";
@@ -179,6 +185,7 @@
           this.$.swap.disabled = true;
           this.$.peek.disabled = false;
           this.$.undo.disabled = true;
+          this.$.redo.disabled = true;
           this.$.reset.disabled = false;
           this.$.sketch.disabled = true;
           this.$.progress.style.visibility = "hidden";
@@ -194,6 +201,7 @@
         this.$.swap.disabled = true;
         this.$.peek.disabled = true;
         this.$.undo.disabled = true;
+        this.$.redo.disabled = true;
         this.$.reset.disabled = true;
         this.$.sketch.disabled = true;
 
@@ -208,10 +216,15 @@
         this.$.sketch.undo();
       },
 
+      _redo: function() {
+        this.$.sketch.redo();
+      },
+
       _reset: function() {
         this.$.swap.disabled = false;
         this.$.peek.disabled = false;
         this.$.undo.disabled = false;
+        this.$.redo.disabled = false;
         this.$.reset.disabled = false;
         this.$.sketch.disabled = false;
         this.$.progress.style.visibility = "hidden";
