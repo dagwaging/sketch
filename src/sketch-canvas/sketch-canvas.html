@@ -89,7 +89,8 @@
       },
 
       undo: function() {
-        // TODO
+        this._lines.pop();
+        this._render();
       },
 
       // Private methods
