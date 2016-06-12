@@ -68,6 +68,8 @@
 
           this._lines[i] = line;
         }
+
+        this._render();
       },
 
       // Private properties
@@ -94,6 +96,26 @@
 
       _onTrack(event) {
         // TODO
+      },
+
+      _render() {
+        this._canvas.clearRect(0, 0, 800, 600);
+
+        for(var i in this._lines) {
+          this._canvas.beginPath();
+
+          var x = this._lines[i][0];
+          var y = this._lines[i][1];
+          this._canvas.moveTo(x, y);
+
+          for(var j = 2; j < this._lines[i].length; j += 2) {
+            var x = this._lines[i][j];
+            var y = this._lines[i][j + 1];
+            this._canvas.lineTo(x, y);
+          }
+
+          this._canvas.stroke();
+        }
       },
 
       _pad: function(n, width) {
