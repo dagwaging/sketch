@@ -58,6 +58,7 @@
       set data(data) {
         var lines = data.split(" ");
         this._lines = new Array(lines.length);
+        this._length = this._lines.length;
 
         for(var i in lines) {
           var line = new Array(lines[i].length / 2);
@@ -78,6 +79,8 @@
 
       _lines: [],
 
+      _length: 0,
+
       // Public methods
 
       play: function() {
@@ -89,7 +92,20 @@
       },
 
       undo: function() {
-        this._lines.pop();
+        if(this._length <= 0) {
+          return;
+        }
+
+        this._length--;
+        this._render();
+      },
+
+      redo: function() {
+        if(this._length >= this._lines.length) {
+          return;
+        }
+
+        this._length++;
         this._render();
       },
 
@@ -105,7 +121,9 @@
 
         switch(event.detail.state) {
           case 'start':
+            this._lines.length = this._length;
             this._lines.push([x, y]);
+            this._length++;
           case 'track':
           case 'end':
             this._addPoint(x, y);
@@ -129,7 +147,7 @@
       _render() {
         this._canvas.clearRect(0, 0, 800, 600);
 
-        for(var i in this._lines) {
+        for(var i = 0; i < this._length; i++) {
           this._canvas.beginPath();
 
           var x = this._lines[i][0];
