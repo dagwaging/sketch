@@ -59,7 +59,7 @@
     </style>
     <div class="content">
       <fit-ratio-container ratio="4/3">
-        <sketch-canvas id="sketch"></sketch-canvas>
+        <sketch-canvas id="sketch" can-undo="{{canUndo}}" can-redo="{{canRedo}}"></sketch-canvas>
       </fit-ratio-container>
       <paper-fab
           id="swap"
@@ -78,11 +78,13 @@
           id="undo"
           title="Undo"
           icon="undo"
+          disabled="{{!canUndo}}"
           on-tap="_undo"></paper-icon-button>
       <paper-icon-button
           id="redo"
           title="Redo"
           icon="redo"
+          disabled="{{!canRedo}}"
           on-tap="_redo"></paper-icon-button>
       <div id="stats" class="title">
         <div id="ink">0% ink used</div>
@@ -128,20 +130,27 @@
         setInterval(this.$.getStatsRequest.generateRequest.bind(this.$.getStatsRequest), 10000);
       },
 
+      // Public properties
+
+      canUndo: false,
+
+      canRedo: false,
+
       // Private methods
 
       _showSketch: function(id) {
-        this.$.swap.disabled = true;
-        this.$.peek.disabled = true;
-        this.$.undo.disabled = true;
-        this.$.reset.disabled = true;
-        this.$.sketch.disabled = true;
-
         this.$.progress.value = 0;
         this.$.progress.style.visibility = "visible";
 
         this.$.getRequest.params = { id: id || "" };
         this.$.getRequest.generateRequest();
+
+        this.$.swap.disabled = true;
+        this.$.peek.disabled = true;
+        this.$.undo.disabled = true;
+        this.$.redo.disabled = true;
+        this.$.reset.disabled = true;
+        this.$.sketch.disabled = true;
       },
 
       // Event handlers for ajax
@@ -164,8 +173,8 @@
         if(id == -1) {
           this.$.swap.disabled = false;
           this.$.peek.disabled = false;
-          this.$.undo.disabled = false;
-          this.$.redo.disabled = false;
+          this.$.undo.disabled = !this.canUndo;
+          this.$.redo.disabled = !this.canRedo;
           this.$.reset.disabled = false;
           this.$.sketch.disabled = false;
           this.$.progress.style.visibility = "hidden";
@@ -182,6 +191,9 @@
           setTimeout(this.$.getRequest.generateRequest.bind(this.$.getRequest), 3000);
         }
         else {
+          this.$.sketch.data = sketchData;
+          this.$.sketch.play();
+
           this.$.swap.disabled = true;
           this.$.peek.disabled = false;
           this.$.undo.disabled = true;
@@ -190,26 +202,24 @@
           this.$.sketch.disabled = true;
           this.$.progress.style.visibility = "hidden";
 
-          this.$.sketch.data = sketchData;
-          this.$.sketch.play();
         }
       },
 
       // Event handlers for buttons
 
       _swap: function() {
+        this.$.progress.value = 0;
+        this.$.progress.style.visibility = "visible";
+
+        this.$.swapRequest.body = this.$.sketch.data;
+        this.$.swapRequest.generateRequest();
+
         this.$.swap.disabled = true;
         this.$.peek.disabled = true;
         this.$.undo.disabled = true;
         this.$.redo.disabled = true;
         this.$.reset.disabled = true;
         this.$.sketch.disabled = true;
-
-        this.$.progress.value = 0;
-        this.$.progress.style.visibility = "visible";
-
-        this.$.swapRequest.body = this.$.sketch.data;
-        this.$.swapRequest.generateRequest();
       },
 
       _undo: function() {
@@ -221,16 +231,16 @@
       },
 
       _reset: function() {
+        this.$.sketch.stop();
+        this.$.sketch.data = "";
+
         this.$.swap.disabled = false;
         this.$.peek.disabled = false;
-        this.$.undo.disabled = false;
-        this.$.redo.disabled = false;
+        this.$.undo.disabled = !this.canUndo;
+        this.$.redo.disabled = !this.canRedo;
         this.$.reset.disabled = false;
         this.$.sketch.disabled = false;
         this.$.progress.style.visibility = "hidden";
-
-        this.$.sketch.stop();
-        this.$.sketch.data = "";
       },
 
       _peek: function() {

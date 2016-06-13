@@ -36,6 +36,18 @@
         disabled: {
           type: Boolean,
           value: false
+        },
+        canUndo: {
+          type: Boolean,
+          notify: true,
+          readOnly: true,
+          value: false
+        },
+        canRedo: {
+          type: Boolean,
+          notify: true,
+          readOnly: true,
+          value: false
         }
       },
 
@@ -56,9 +68,11 @@
       },
 
       set data(data) {
-        var lines = data.split(" ");
+        var lines = data.length > 0 ? data.split(" ") : [];
         this._lines = new Array(lines.length);
         this._length = this._lines.length;
+        this._setCanUndo(this._length > 0);
+        this._setCanRedo(false);
 
         for(var i in lines) {
           var line = new Array(lines[i].length / 2);
@@ -92,21 +106,19 @@
       },
 
       undo: function() {
-        if(this._length <= 0) {
-          return;
-        }
-
         this._length--;
         this._render();
+
+        this._setCanUndo(this._length > 0);
+        this._setCanRedo(this._lines.length > 0);
       },
 
       redo: function() {
-        if(this._length >= this._lines.length) {
-          return;
-        }
-
         this._length++;
         this._render();
+
+        this._setCanUndo(this._lines.length > 0);
+        this._setCanRedo(this._length < this._lines.length);
       },
 
       // Private methods
@@ -121,6 +133,8 @@
 
         switch(event.detail.state) {
           case 'start':
+            this._setCanUndo(true);
+            this._setCanRedo(false);
             this._lines.length = this._length;
             this._lines.push([x, y]);
             this._length++;
