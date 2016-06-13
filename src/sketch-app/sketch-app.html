@@ -1,4 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
@@ -104,6 +106,16 @@
           icon="view-module"
           on-tap="_viewGallery"></paper-icon-button>
     </paper-toolbar>
+    <paper-dialog id="resetDialog" on-iron-overlay-closed="_doReset">
+      <h2>Are you sure?</h2>
+      <p>
+        You will lose your current drawing
+      </p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm>Reset</paper-button>
+      </div>
+    </paper-dialog>
     <iron-ajax
         id="getStatsRequest"
         url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/getStats.php?timespan=300"
@@ -243,6 +255,14 @@
       },
 
       _reset: function() {
+        this.$.resetDialog.open();
+      },
+
+      _doReset: function(event) {
+        if(event.detail.canceled || !event.detail.confirmed) {
+          return;
+        }
+
         this.$.sketch.stop();
         this.$.sketch.data = "";
 
