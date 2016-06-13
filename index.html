@@ -6,10 +6,22 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="/css/style.css">
     <script src="/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
     <link rel="import" href="/src/sketch-app/sketch-app.html">
+    <style is="custom-style">
+      :root {
+        --primary-color: #980706;
+        //--light-primary-color: var(--paper-red-500);
+        //--dark-primary-color: var(--paper-red-900);
+
+        --accent-color: var(--paper-indigo-a200);
+        --light-accent-color: var(--paper-indigo-a100);
+        --dark-accent-color: var(--paper-indigo-a400);
+
+        --paper-progress-active-color: var(--paper-indigo-a200);
+      }
+    </style>
   </head>
   <body class="fullbleed">
     <sketch-app></sketch-app>
