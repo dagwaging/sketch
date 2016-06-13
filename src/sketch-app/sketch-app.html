@@ -1,4 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
 <link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
@@ -119,6 +120,10 @@
         url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/get.php"
         handle-as="text"
         on-response="_onGet"></iron-ajax>
+    <iron-a11y-keys target="[[target]]" keys="ctrl+z" on-keys-pressed="_undo"></iron-a11y-keys>
+    <iron-a11y-keys target="[[target]]" keys="ctrl+y" on-keys-pressed="_redo"></iron-a11y-keys>
+    <iron-a11y-keys target="[[target]]" keys="delete" on-keys-pressed="_reset"></iron-a11y-keys>
+    <iron-a11y-keys target="[[target]]" keys="enter" on-keys-pressed="_swap"></iron-a11y-keys>
   </template>
 
   <script>
@@ -131,6 +136,13 @@
       },
 
       // Public properties
+
+      properties: {
+        target: {
+          type: Object,
+          value: document.body
+        }
+      },
 
       canUndo: false,
 

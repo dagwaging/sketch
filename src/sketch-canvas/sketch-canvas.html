@@ -106,6 +106,10 @@
       },
 
       undo: function() {
+        if(!this.canUndo) {
+          return;
+        }
+
         this._length--;
         this._render();
 
@@ -114,6 +118,10 @@
       },
 
       redo: function() {
+        if(!this.canRedo) {
+          return;
+        }
+
         this._length++;
         this._render();
 
