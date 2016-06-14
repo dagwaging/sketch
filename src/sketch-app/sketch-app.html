@@ -260,11 +260,16 @@
       },
 
       _reset: function() {
-        this.$.resetDialog.open();
+        if(this.$.sketch.disabled) {
+          this._doReset();
+        }
+        else {
+          this.$.resetDialog.open();
+        }
       },
 
       _doReset: function(event) {
-        if(event.detail.canceled || !event.detail.confirmed) {
+        if(event && (event.detail.canceled || !event.detail.confirmed)) {
           return;
         }
 
