@@ -15,7 +15,7 @@
         height: 100%;
       }
     </style>
-    <canvas id="sketchCanvas" on-track="_onTrack" width="800" height="600"></canvas>
+    <canvas id="sketchCanvas" on-track="_onTrack" on-tap="_onTrack" width="800" height="600"></canvas>
   </template>
   <script>
   (function() {
@@ -30,7 +30,7 @@
         this._canvas.lineWidth = 3;
         this._canvas.lineJoin = "round";
         this._canvas.lineCap = "round";
-        this._canvas.fillStyle = "white";
+        this._canvas.fillStyle = "black";
       },
 
       // Public properties
@@ -177,6 +177,7 @@
         var x = Math.round(800.0 * event.detail.sourceEvent.offsetX / event.srcElement.offsetWidth);
         var y = Math.round(600.0 * event.detail.sourceEvent.offsetY / event.srcElement.offsetHeight);
 
+        if(event.type == 'track') {
           switch(event.detail.state) {
             case 'start':
               this._setCanUndo(true);
@@ -187,6 +188,13 @@
             case 'end':
               this._addPoint(x, y);
               break;
+          }
+        }
+        else if(event.type == 'tap') {
+          this._setCanUndo(true);
+          this._setCanRedo(false);
+          this._startLine(x, y);
+          this._addPoint(x, y);
         }
       },
 
@@ -199,15 +207,23 @@
 
       _addPoint(x, y) {
         var lastLine = this._lines[this._lines.length - 1];
-        var lastX = lastLine[lastLine.length - 2];
-        var lastY = lastLine[lastLine.length - 1];
-
         lastLine.push(x, y);
         this._setDataLength(this.dataLength + 4);
+        this._drawLine(lastLine.slice(lastLine.length - 4, lastLine.length));
+      },
+
+      _drawLine(points) {
+        if(points[0] == points[2] && points[1] == points[3]) {
+          this._canvas.beginPath();
+          this._canvas.ellipse(points[0], points[1], 1.5, 1.5, 0, 0, Math.PI * 2);
+          this._canvas.fill();
+        }
 
         this._canvas.beginPath();
-        this._canvas.moveTo(lastX, lastY);
-        this._canvas.lineTo(x, y);
+        this._canvas.moveTo(points[0], points[1]);
+        for(var i = 2; i < points.length; i += 2) {
+            this._canvas.lineTo(points[i], points[i + 1]);
+        }
         this._canvas.stroke();
       },
 
@@ -218,16 +234,7 @@
           var pointsDrawn = 0;
 
           while(pointsDrawn < pointsToDraw) {
-            var lastX = this._lines[this._playProgressLines][this._playProgressPoints];
-            var lastY = this._lines[this._playProgressLines][this._playProgressPoints + 1];
-
-            var x = this._lines[this._playProgressLines][this._playProgressPoints + 2];
-            var y = this._lines[this._playProgressLines][this._playProgressPoints + 3];
-
-            this._canvas.beginPath();
-            this._canvas.moveTo(lastX, lastY);
-            this._canvas.lineTo(x, y);
-            this._canvas.stroke();
+            this._drawLine(this._lines[this._playProgressLines].slice(this._playProgressPoints, this._playProgressPoints + 4));
 
             pointsDrawn++;
             this._playProgressPoints += 2;
@@ -252,19 +259,7 @@
         this._canvas.clearRect(0, 0, 800, 600);
 
         for(var i = 0; i < this._length; i++) {
-          this._canvas.beginPath();
-
-          var x = this._lines[i][0];
-          var y = this._lines[i][1];
-          this._canvas.moveTo(x, y);
-
-          for(var j = 2; j < this._lines[i].length; j += 2) {
-            var x = this._lines[i][j];
-            var y = this._lines[i][j + 1];
-            this._canvas.lineTo(x, y);
-          }
-
-          this._canvas.stroke();
+          this._drawLine(this._lines[i]);
         }
       },
 
