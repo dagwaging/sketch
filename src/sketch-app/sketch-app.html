@@ -106,14 +106,14 @@
           icon="view-module"
           on-tap="_viewGallery"></paper-icon-button>
     </paper-toolbar>
-    <paper-dialog id="resetDialog" on-iron-overlay-closed="_doReset">
+    <paper-dialog id="resetDialog" on-iron-overlay-closed="_doReset" with-backdrop>
       <h2>Are you sure?</h2>
       <p>
         You will lose your current drawing
       </p>
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button dialog-confirm>Reset</paper-button>
+        <paper-button dialog-confirm autofocus>Reset</paper-button>
       </div>
     </paper-dialog>
     <iron-ajax
@@ -140,7 +140,7 @@
     <iron-a11y-keys target="[[target]]" keys="ctrl+z" on-keys-pressed="_undo"></iron-a11y-keys>
     <iron-a11y-keys target="[[target]]" keys="ctrl+y" on-keys-pressed="_redo"></iron-a11y-keys>
     <iron-a11y-keys target="[[target]]" keys="delete" on-keys-pressed="_reset"></iron-a11y-keys>
-    <iron-a11y-keys target="[[target]]" keys="enter" on-keys-pressed="_swap"></iron-a11y-keys>
+    <iron-a11y-keys target="[[target]]" keys="ctrl+enter" on-keys-pressed="_swap"></iron-a11y-keys>
   </template>
 
   <script>
@@ -230,7 +230,6 @@
           this.$.reset.disabled = false;
           this.$.sketch.disabled = true;
           this.$.progress.style.visibility = "hidden";
-
         }
       },
 
