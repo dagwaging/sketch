@@ -129,7 +129,7 @@
       // Public methods
 
       play: function() {
-        this._canvas.clearRect(0, 0, 800, 600);
+        this._clear();
         this._setPlaying(true);
         this._playProgressLines = 0;
         this._playProgressPoints = 0;
@@ -231,6 +231,12 @@
         this._canvas.stroke();
       },
 
+      _clear() {
+        this._canvas.fillStyle = "white";
+        this._canvas.fillRect(0, 0, 800, 600);
+        this._canvas.fillStyle = "black";
+      },
+
       _animate(timestamp) {
         if(this._lastTimestamp) {
           var timeDelta = timestamp - this._lastTimestamp;
@@ -260,7 +266,7 @@
       },
 
       _render() {
-        this._canvas.clearRect(0, 0, 800, 600);
+        this._clear();
 
         for(var i = 0; i < this._length; i++) {
           this._drawLine(this._lines[i]);
