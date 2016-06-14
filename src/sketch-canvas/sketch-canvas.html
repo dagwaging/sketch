@@ -48,6 +48,11 @@
           notify: true,
           readOnly: true
         },
+        playing: {
+          type: Boolean,
+          readOnly: true,
+          value: false
+        },
         disabled: {
           type: Boolean,
           value: false
@@ -111,14 +116,25 @@
 
       _length: 0,
 
+      _playProgressLines: 0,
+
+      _playProgressPoints: 0,
+
+      _lastTimestamp: null,
+
       // Public methods
 
       play: function() {
-        // TODO
+        this._canvas.clearRect(0, 0, 800, 600);
+        this._setPlaying(true);
+        this._playProgressLines = 0;
+        this._playProgressPoints = 0;
+        this._lastTimestamp = null;
+        window.requestAnimationFrame(this._animate.bind(this));
       },
 
       stop: function() {
-        // TODO
+        this.playing = false;
       },
 
       undo: function() {
@@ -161,19 +177,24 @@
         var x = Math.round(800.0 * event.detail.sourceEvent.offsetX / event.srcElement.offsetWidth);
         var y = Math.round(600.0 * event.detail.sourceEvent.offsetY / event.srcElement.offsetHeight);
 
-        switch(event.detail.state) {
-          case 'start':
-            this._setCanUndo(true);
-            this._setCanRedo(false);
-            this._lines.length = this._length;
-            this._lines.push([x, y]);
-            this._setDataLength(this.dataLength + 5);
-            this._length++;
-          case 'track':
-          case 'end':
-            this._addPoint(x, y);
-            break;
+          switch(event.detail.state) {
+            case 'start':
+              this._setCanUndo(true);
+              this._setCanRedo(false);
+              this._startLine(x, y);
+              break;
+            case 'track':
+            case 'end':
+              this._addPoint(x, y);
+              break;
         }
+      },
+
+      _startLine(x, y) {
+        this._lines.length = this._length;
+        this._lines.push([x, y]);
+        this._setDataLength(this.dataLength + 5);
+        this._length++;
       },
 
       _addPoint(x, y) {
@@ -188,6 +209,43 @@
         this._canvas.moveTo(lastX, lastY);
         this._canvas.lineTo(x, y);
         this._canvas.stroke();
+      },
+
+      _animate(timestamp) {
+        if(this._lastTimestamp) {
+          var timeDelta = timestamp - this._lastTimestamp;
+          var pointsToDraw = timeDelta / 1000 * 100;
+          var pointsDrawn = 0;
+
+          while(pointsDrawn < pointsToDraw) {
+            var lastX = this._lines[this._playProgressLines][this._playProgressPoints];
+            var lastY = this._lines[this._playProgressLines][this._playProgressPoints + 1];
+
+            var x = this._lines[this._playProgressLines][this._playProgressPoints + 2];
+            var y = this._lines[this._playProgressLines][this._playProgressPoints + 3];
+
+            this._canvas.beginPath();
+            this._canvas.moveTo(lastX, lastY);
+            this._canvas.lineTo(x, y);
+            this._canvas.stroke();
+
+            pointsDrawn++;
+            this._playProgressPoints += 2;
+            if(this._playProgressPoints >= this._lines[this._playProgressLines].length - 2) {
+              this._playProgressPoints = 0;
+              this._playProgressLines++;
+              if(this._playProgressLines >= this._lines.length) {
+                break;
+              }
+            }
+          }
+        }
+
+        this._lastTimestamp = timestamp;
+
+        if(this.playing && this._playProgressLines < this._lines.length) {
+          window.requestAnimationFrame(this._animate.bind(this));
+        }
       },
 
       _render() {
