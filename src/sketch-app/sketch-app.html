@@ -158,6 +158,7 @@
       ready: function() {
         this.$.getStatsRequest.generateRequest();
         setInterval(this.$.getStatsRequest.generateRequest.bind(this.$.getStatsRequest), 10000);
+        setInterval(this._saveData.bind(this), 10000);
 
         this._restoreData();
         window.addEventListener('beforeunload', this._saveData.bind(this));
@@ -193,7 +194,7 @@
         this.$.sketch.disabled = true;
       },
 
-      _saveData: function(event) {
+      _saveData: function() {
         localStorage.setItem('data', this.$.sketch.disabled ? "" : this.$.sketch.data);
       },
 
