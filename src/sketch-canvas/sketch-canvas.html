@@ -74,7 +74,7 @@
       get data() {
         var data = [];
 
-        for(var i in this._lines) {
+        for(var i = 0; i < this._length; i++) {
           var line = new Array(this._lines[i].length);
 
           for(var j in this._lines[i]) {
