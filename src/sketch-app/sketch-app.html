@@ -62,7 +62,7 @@
     </style>
     <div class="content">
       <fit-ratio-container ratio="4/3">
-        <sketch-canvas id="sketch" can-undo="{{canUndo}}" can-redo="{{canRedo}}"></sketch-canvas>
+        <sketch-canvas id="sketch" ink="{{ink}}" can-undo="{{canUndo}}" can-redo="{{canRedo}}"></sketch-canvas>
       </fit-ratio-container>
       <paper-fab
           id="swap"
@@ -90,7 +90,7 @@
           disabled="{{!canRedo}}"
           on-tap="_redo"></paper-icon-button>
       <div id="stats" class="title">
-        <div id="ink">0% ink used</div>
+          <div id="ink">{{ink}}% ink used</div>
         <div id="sketches"></div>
         <div id="artists"></div>
         <div id="peekers"></div>
