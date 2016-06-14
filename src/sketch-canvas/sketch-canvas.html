@@ -138,7 +138,7 @@
       },
 
       undo: function() {
-        if(!this.canUndo) {
+        if(!this.canUndo || this.disabled) {
           return;
         }
 
@@ -151,7 +151,7 @@
       },
 
       redo: function() {
-        if(!this.canRedo) {
+        if(!this.canRedo || this.disabled) {
           return;
         }
 
