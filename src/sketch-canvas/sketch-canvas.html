@@ -108,6 +108,10 @@
         this._render();
       },
 
+      get canvasData() {
+        return this.$.sketchCanvas.toDataURL("image/png");
+      },
+
       // Private properties
 
       _canvas: null,
