@@ -194,7 +194,7 @@
       },
 
       _saveData: function(event) {
-        localStorage.setItem('data', this.$.sketch.data);
+        localStorage.setItem('data', this.$.sketch.disabled ? "" : this.$.sketch.data);
       },
 
       _restoreData: function() {
