@@ -158,6 +158,9 @@
       ready: function() {
         this.$.getStatsRequest.generateRequest();
         setInterval(this.$.getStatsRequest.generateRequest.bind(this.$.getStatsRequest), 10000);
+
+        this._restoreData();
+        window.addEventListener('beforeunload', this._saveData.bind(this));
       },
 
       // Public properties
@@ -188,6 +191,14 @@
         this.$.redo.disabled = true;
         this.$.reset.disabled = true;
         this.$.sketch.disabled = true;
+      },
+
+      _saveData: function(event) {
+        localStorage.setItem('data', this.$.sketch.data);
+      },
+
+      _restoreData: function() {
+        this.$.sketch.data = localStorage.getItem('data') || "";
       },
 
       // Event handlers for ajax
