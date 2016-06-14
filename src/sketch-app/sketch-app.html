@@ -122,6 +122,11 @@
         handle-as="text"
         on-response="_onGetStats"></iron-ajax>
     <iron-ajax
+        id="getMaxIDRequest"
+        url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/getMaxID.php"
+        handle-as="text"
+        on-response="_onSwap"></iron-ajax>
+    <iron-ajax
         id="swapRequest"
         url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/swap.php?v=32"
         method="POST"
@@ -276,7 +281,17 @@
       },
 
       _peek: function() {
-        this._showSketch();
+        this.$.progress.value = 0;
+        this.$.progress.style.visibility = "visible";
+
+        this.$.getMaxIDRequest.generateRequest();
+
+        this.$.swap.disabled = true;
+        this.$.peek.disabled = true;
+        this.$.undo.disabled = true;
+        this.$.redo.disabled = true;
+        this.$.reset.disabled = true;
+        this.$.sketch.disabled = true;
       },
 
       _viewGallery: function() {
