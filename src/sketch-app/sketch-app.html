@@ -160,6 +160,9 @@
         setInterval(this.$.getStatsRequest.generateRequest.bind(this.$.getStatsRequest), 10000);
         setInterval(this._saveData.bind(this), 10000);
 
+        this._trackTabOpen();
+        window.addEventListener('beforeunload', this._trackTabClose.bind(this));
+
         this._restoreData();
         window.addEventListener('beforeunload', this._saveData.bind(this));
       },
@@ -176,6 +179,10 @@
       canUndo: false,
 
       canRedo: false,
+
+      // Private properties
+
+      _tabID: -1,
 
       // Private methods
 
@@ -194,12 +201,54 @@
         this.$.sketch.disabled = true;
       },
 
+      _trackTabOpen: function() {
+        var tabs = JSON.parse(localStorage.getItem('tabs') || "{}");
+
+        for(var id in tabs) {
+          if(!tabs[id]) {
+            this._tabID = id;
+            break;
+          }
+        }
+
+        if(this._tabID == -1) {
+          this._tabID = 0;
+          while(tabs[this._tabID]) {
+            this._tabID++;
+          }
+        }
+
+        tabs[this._tabID] = true;
+        localStorage.setItem('tabs', JSON.stringify(tabs));
+      },
+
+      _trackTabClose: function() {
+        var tabs = JSON.parse(localStorage.getItem('tabs') || "{}");
+        var data = this.$.sketch.disabled ? "" : this.$.sketch.data;
+
+        if(data.length > 0) {
+          tabs[this._tabID] = false;
+        }
+        else {
+          delete tabs[this._tabID];
+        }
+
+        localStorage.setItem('tabs', JSON.stringify(tabs));
+      },
+
       _saveData: function() {
-        localStorage.setItem('data', this.$.sketch.disabled ? "" : this.$.sketch.data);
+        var data = this.$.sketch.disabled ? "" : this.$.sketch.data;
+
+        if(data.length > 0) {
+          localStorage.setItem('data' + this._tabID, data);
+        }
+        else {
+          localStorage.removeItem('data' + this._tabID);
+        }
       },
 
       _restoreData: function() {
-        this.$.sketch.data = localStorage.getItem('data') || "";
+        this.$.sketch.data = localStorage.getItem('data' + this._tabID) || "";
       },
 
       // Event handlers for ajax
