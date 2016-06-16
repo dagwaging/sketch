@@ -62,12 +62,13 @@
     </style>
     <div class="content">
       <fit-ratio-container ratio="4/3">
-        <sketch-canvas id="sketch" ink="{{ink}}" can-undo="{{canUndo}}" can-redo="{{canRedo}}"></sketch-canvas>
+          <sketch-canvas id="sketch" ink="{{ink}}" can-undo="{{canUndo}}" can-redo="{{canRedo}}" disabled="{{sketchDisabled}}"></sketch-canvas>
       </fit-ratio-container>
       <paper-fab
           id="swap"
           title="{{localize('swap')}}"
           icon="send"
+          disabled="{{_swapDisabled(sketchDisabled, loading)}}"
           on-tap="_swap"></paper-fab>
     </div>
     <paper-toolbar>
@@ -76,18 +77,19 @@
           id="reset"
           title="{{localize('reset')}}"
           icon="delete"
+          disabled="{{_resetDisabled(loading, canUndo)}}"
           on-tap="_reset"></paper-icon-button>
       <paper-icon-button
           id="undo"
           title="{{localize('undo')}}"
           icon="undo"
-          disabled="{{!canUndo}}"
+          disabled="{{_editDisabled(sketchDisabled, loading, canUndo)}}"
           on-tap="_undo"></paper-icon-button>
       <paper-icon-button
           id="redo"
           title="{{localize('redo')}}"
           icon="redo"
-          disabled="{{!canRedo}}"
+          disabled="{{_editDisabled(sketchDisabled, loading, canRedo)}}"
           on-tap="_redo"></paper-icon-button>
       <div id="stats" class="title">
         <div id="ink">{{localize('ink', 'amount', ink)}}</div>
@@ -99,6 +101,7 @@
           id="peek"
           title="{{localize('peek')}}"
           icon="visibility"
+          disabled="{{loading}}"
           on-tap="_peek"></paper-icon-button>
       <paper-icon-button
           id="gallery"
@@ -167,15 +170,23 @@
         }
       },
 
-      canUndo: false,
-
-      canRedo: false,
-
       // Private properties
 
       _tabID: -1,
 
       // Private methods
+
+      _swapDisabled: function(sketchDisabled, loading) {
+        return sketchDisabled || loading;
+      },
+
+      _resetDisabled: function(loading, enabled) {
+        return loading || !enabled;
+      },
+
+      _editDisabled: function(sketchDisabled, loading, enabled) {
+        return sketchDisabled || loading || !enabled;
+      },
 
       _trackTabOpen: function() {
         var tabs = JSON.parse(localStorage.getItem('tabs') || "{}");
@@ -230,37 +241,19 @@
       // Event handlers for ajax
 
       _onSwapFailed: function() {
-        this.$.swap.disabled = false;
-        this.$.peek.disabled = false;
-        this.$.undo.disabled = !this.canUndo;
-        this.$.redo.disabled = !this.canRedo;
-        this.$.reset.disabled = false;
-        this.$.sketch.disabled = false;
+        this.sketchDisabled = false;
       },
 
       _onGet: function(data) {
         this.$.sketch.data = data.detail;
         this.$.sketch.play();
-
-        this.$.swap.disabled = true;
-        this.$.peek.disabled = false;
-        this.$.undo.disabled = true;
-        this.$.redo.disabled = true;
-        this.$.reset.disabled = false;
-        this.$.sketch.disabled = true;
       },
 
       // Event handlers for buttons
 
       _swap: function() {
         this.$.api.swap(this.$.sketch.data);
-
-        this.$.swap.disabled = true;
-        this.$.peek.disabled = true;
-        this.$.undo.disabled = true;
-        this.$.redo.disabled = true;
-        this.$.reset.disabled = true;
-        this.$.sketch.disabled = true;
+        this.sketchDisabled = true;
       },
 
       _undo: function() {
@@ -287,24 +280,12 @@
 
         this.$.sketch.stop();
         this.$.sketch.data = "";
-
-        this.$.swap.disabled = false;
-        this.$.peek.disabled = false;
-        this.$.undo.disabled = !this.canUndo;
-        this.$.redo.disabled = !this.canRedo;
-        this.$.reset.disabled = false;
-        this.$.sketch.disabled = false;
+        this.sketchDisabled = false;
       },
 
       _peek: function() {
         this.$.api.peek();
-
-        this.$.swap.disabled = true;
-        this.$.peek.disabled = true;
-        this.$.undo.disabled = true;
-        this.$.redo.disabled = true;
-        this.$.reset.disabled = true;
-        this.$.sketch.disabled = true;
+        this.sketchDisabled = true;
       },
 
       _viewGallery: function() {
