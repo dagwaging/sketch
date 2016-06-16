@@ -87,12 +87,12 @@
       <paper-icon-button
           title="{{localize('undo')}}"
           icon="undo"
-          disabled="{{_editDisabled(sketchDisabled, loading, canUndo)}}"
+          disabled="{{_editDisabled(loading, canUndo)}}"
           on-tap="_undo"></paper-icon-button>
       <paper-icon-button
           title="{{localize('redo')}}"
           icon="redo"
-          disabled="{{_editDisabled(sketchDisabled, loading, canRedo)}}"
+          disabled="{{_editDisabled(loading, canRedo)}}"
           on-tap="_redo"></paper-icon-button>
 
       <div class="title">
@@ -203,8 +203,8 @@
         return loading || (sketchDisabled ? false : !enabled);
       },
 
-      _editDisabled: function(sketchDisabled, loading, enabled) {
-        return sketchDisabled || loading || !enabled;
+      _editDisabled: function(loading, enabled) {
+        return loading || !enabled;
       },
 
       _trackTabOpen: function() {

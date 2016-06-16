@@ -16,8 +16,17 @@
         height: 100%;
       }
     </style>
-    <canvas id="sketchCanvas" on-track="_onTrack" on-tap="_onTrack" width="800" height="600"></canvas>
-    <sketch-data id="data" length="{{dataLength}}" can-undo="{{canUndo}}" can-redo="{{canRedo}}"></sketch-data>
+    <canvas
+        id="sketchCanvas"
+        on-track="_onTrack"
+        on-tap="_onTrack"
+        width="800"
+        height="600"></canvas>
+    <sketch-data
+        id="data"
+        length="{{dataLength}}"
+        can-undo="{{dataCanUndo}}"
+        can-redo="{{dataCanRedo}}"></sketch-data>
   </template>
   <script>
   (function() {
@@ -54,11 +63,13 @@
         },
         canUndo: {
           type: Boolean,
-          notify: true
+          notify: true,
+          computed: '_canEdit(dataCanUndo, disabled)'
         },
         canRedo: {
           type: Boolean,
-          notify: true
+          notify: true,
+          computed: '_canEdit(dataCanRedo, disabled)'
         }
       },
 
@@ -216,6 +227,10 @@
         for(var i in this.$.data.lines) {
           this._drawLine(this.$.data.lines[i]);
         }
+      },
+
+      _canEdit(canEdit, disabled) {
+        return canEdit && !disabled;
       }
     });
   })();
