@@ -8,9 +8,9 @@
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
-<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../fit-ratio-container/fit-ratio-container.html">
 <link rel="import" href="../sketch-canvas/sketch-canvas.html">
+<link rel="import" href="../sketch-api/sketch-api.html">
 
 <dom-module id="sketch-app">
   <template>
@@ -56,7 +56,6 @@
       }
 
       #progress {
-        visibility: hidden;
         top: 0;
       }
     </style>
@@ -71,7 +70,7 @@
           on-tap="_swap"></paper-fab>
     </div>
     <paper-toolbar>
-      <paper-progress class="fit" id="progress" indeterminate></paper-progress>
+      <paper-progress class="fit" id="progress" hidden="{{!loading}}" indeterminate></paper-progress>
       <paper-icon-button
           id="reset"
           title="Reset"
@@ -90,10 +89,10 @@
           disabled="{{!canRedo}}"
           on-tap="_redo"></paper-icon-button>
       <div id="stats" class="title">
-          <div id="ink">{{ink}}% ink used</div>
-        <div id="sketches"></div>
-        <div id="artists"></div>
-        <div id="peekers"></div>
+        <div id="ink">{{ink}}% ink used</div>
+        <div id="sketches">{{sketches}} sketches</div>
+        <div id="artists">{{artists}} artists</div>
+        <div id="peekers">{{peekers}} peekers</div>
       </div>
       <paper-icon-button
           id="peek"
@@ -121,34 +120,18 @@
         <paper-button dialog-confirm autofocus>Reset</paper-button>
       </div>
     </paper-dialog>
-    <iron-ajax
-        id="getStatsRequest"
-        url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/getStats.php?timespan=300"
-        handle-as="text"
-        on-response="_onGetStats"></iron-ajax>
-    <iron-ajax
-        id="getMaxIDRequest"
-        url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/getMaxID.php"
-        handle-as="text"
-        on-response="_onSwap"></iron-ajax>
-    <iron-ajax
-        id="swapRequest"
-        url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/swap.php?v=32"
-        method="POST"
-        handle-as="text"
-        on-response="_onSwap"></iron-ajax>
-    <iron-ajax
-        id="getRequest"
-        url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/get.php"
-        handle-as="text"
-        on-response="_onGet"></iron-ajax>
-    <form id="saveForm" action="http://cors-dagwaging.rhcloud.com/download/sketch.png" method="POST">
-      <input type="hidden" id="saveData" name="data" />
-    </form>
     <iron-a11y-keys target="[[target]]" keys="ctrl+z" on-keys-pressed="_undo"></iron-a11y-keys>
     <iron-a11y-keys target="[[target]]" keys="ctrl+y" on-keys-pressed="_redo"></iron-a11y-keys>
     <iron-a11y-keys target="[[target]]" keys="delete" on-keys-pressed="_reset"></iron-a11y-keys>
     <iron-a11y-keys target="[[target]]" keys="ctrl+enter" on-keys-pressed="_swap"></iron-a11y-keys>
+    <sketch-api
+        id="api"
+        sketches="{{sketches}}"
+        artists="{{artists}}"
+        peekers="{{peekers}}"
+        loading="{{loading}}"
+        on-get="_onGet"
+        on-swap-failed="_onSwapFailed"></sketch-api>
   </template>
 
   <script>
@@ -156,8 +139,6 @@
       is: 'sketch-app',
 
       ready: function() {
-        this.$.getStatsRequest.generateRequest();
-        setInterval(this.$.getStatsRequest.generateRequest.bind(this.$.getStatsRequest), 10000);
         setInterval(this._saveData.bind(this), 10000);
 
         this._trackTabOpen();
@@ -185,21 +166,6 @@
       _tabID: -1,
 
       // Private methods
-
-      _showSketch: function(id) {
-        this.$.progress.value = 0;
-        this.$.progress.style.visibility = "visible";
-
-        this.$.getRequest.params = { id: id || "" };
-        this.$.getRequest.generateRequest();
-
-        this.$.swap.disabled = true;
-        this.$.peek.disabled = true;
-        this.$.undo.disabled = true;
-        this.$.redo.disabled = true;
-        this.$.reset.disabled = true;
-        this.$.sketch.disabled = true;
-      },
 
       _trackTabOpen: function() {
         var tabs = JSON.parse(localStorage.getItem('tabs') || "{}");
@@ -253,63 +219,31 @@
 
       // Event handlers for ajax
 
-      _onGetStats: function(event) {
-        var stats = event.detail.response.split(",");
-
-        var sketches = parseInt(stats[0]);
-        var artists = parseInt(stats[1]);
-        var peekers = parseInt(stats[2]);
-
-        this.$.sketches.innerText = sketches + (sketches == 1 ? " sketch" : " sketches");
-        this.$.artists.innerText = artists + (artists == 1 ? " artist" : " artists");
-        this.$.peekers.innerText = peekers + (peekers == 1 ? " peeker" : " peekers");
+      _onSwapFailed: function() {
+        this.$.swap.disabled = false;
+        this.$.peek.disabled = false;
+        this.$.undo.disabled = !this.canUndo;
+        this.$.redo.disabled = !this.canRedo;
+        this.$.reset.disabled = false;
+        this.$.sketch.disabled = false;
       },
 
-      _onSwap: function(event) {
-        var id = parseInt(event.detail.response);
+      _onGet: function(data) {
+        this.$.sketch.data = data.detail;
+        this.$.sketch.play();
 
-        if(id == -1) {
-          this.$.swap.disabled = false;
-          this.$.peek.disabled = false;
-          this.$.undo.disabled = !this.canUndo;
-          this.$.redo.disabled = !this.canRedo;
-          this.$.reset.disabled = false;
-          this.$.sketch.disabled = false;
-          this.$.progress.style.visibility = "hidden";
-        }
-        else {
-          this._showSketch(id);
-        }
-      },
-
-      _onGet: function(event) {
-        var sketchData = event.detail.response;
-
-        if(sketchData == "wait") {
-          setTimeout(this.$.getRequest.generateRequest.bind(this.$.getRequest), 3000);
-        }
-        else {
-          this.$.sketch.data = sketchData;
-          this.$.sketch.play();
-
-          this.$.swap.disabled = true;
-          this.$.peek.disabled = false;
-          this.$.undo.disabled = true;
-          this.$.redo.disabled = true;
-          this.$.reset.disabled = false;
-          this.$.sketch.disabled = true;
-          this.$.progress.style.visibility = "hidden";
-        }
+        this.$.swap.disabled = true;
+        this.$.peek.disabled = false;
+        this.$.undo.disabled = true;
+        this.$.redo.disabled = true;
+        this.$.reset.disabled = false;
+        this.$.sketch.disabled = true;
       },
 
       // Event handlers for buttons
 
       _swap: function() {
-        this.$.progress.value = 0;
-        this.$.progress.style.visibility = "visible";
-
-        this.$.swapRequest.body = this.$.sketch.data;
-        this.$.swapRequest.generateRequest();
+        this.$.api.swap(this.$.sketch.data);
 
         this.$.swap.disabled = true;
         this.$.peek.disabled = true;
@@ -350,14 +284,10 @@
         this.$.redo.disabled = !this.canRedo;
         this.$.reset.disabled = false;
         this.$.sketch.disabled = false;
-        this.$.progress.style.visibility = "hidden";
       },
 
       _peek: function() {
-        this.$.progress.value = 0;
-        this.$.progress.style.visibility = "visible";
-
-        this.$.getMaxIDRequest.generateRequest();
+        this.$.api.peek();
 
         this.$.swap.disabled = true;
         this.$.peek.disabled = true;
@@ -372,8 +302,7 @@
       },
 
       _save: function() {
-        this.$.saveData.value = this.$.sketch.canvasData;
-        this.$.saveForm.submit();
+        this.$.api.save(this.$.sketch.canvasData);
       }
     });
   </script>

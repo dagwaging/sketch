@@ -1,0 +1,128 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+
+<dom-module id="sketch-api">
+  <template>
+    <iron-ajax
+        id="getStatsRequest"
+        url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/getStats.php?timespan=300"
+        handle-as="text"
+        on-response="_onGetStats"></iron-ajax>
+    <iron-ajax
+        id="getMaxIDRequest"
+        url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/getMaxID.php"
+        handle-as="text"
+        on-response="_onSwap"></iron-ajax>
+    <iron-ajax
+        id="swapRequest"
+        url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/swap.php?v=32"
+        method="POST"
+        handle-as="text"
+        on-response="_onSwap"></iron-ajax>
+    <iron-ajax
+        id="getRequest"
+        url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/get.php"
+        handle-as="text"
+        on-response="_onGet"></iron-ajax>
+    <form id="saveForm" action="http://cors-dagwaging.rhcloud.com/download/sketch.png" method="POST">
+      <input type="hidden" id="saveData" name="data" />
+    </form>
+  </template>
+  <script>
+  (function() {
+    var GET_STATS_INTERVAL = 10000;
+    var GET_INTERVAL = 3000;
+
+    Polymer({
+      is: 'sketch-api',
+
+      ready: function() {
+        this.$.getStatsRequest.generateRequest();
+        setInterval(this.$.getStatsRequest.generateRequest.bind(this.$.getStatsRequest), GET_STATS_INTERVAL);
+      },
+
+      // Public properties
+
+      properties: {
+        loading: {
+          type: Boolean,
+          value: false,
+          notify: true,
+          readOnly: true
+        },
+        sketches: {
+          type: Number,
+          value: 0,
+          notify: true,
+          readOnly: true
+        },
+        artists: {
+          type: Number,
+          value: 0,
+          notify: true,
+          readOnly: true
+        },
+        peekers: {
+          type: Number,
+          value: 0,
+          notify: true,
+          readOnly: true
+        }
+      },
+
+      // Public functions
+
+      peek: function() {
+        this.$.getMaxIDRequest.generateRequest();
+        this._setLoading(true);
+      },
+
+      swap: function(data) {
+        this.$.swapRequest.body = data;
+        this.$.swapRequest.generateRequest();
+        this._setLoading(true);
+      },
+
+      save: function(data) {
+        this.$.saveData.value = data;
+        this.$.saveForm.submit();
+      },
+
+      // Private functions
+
+      _onGet: function(event) {
+        var data = event.detail.response;
+
+        if(data == "wait") {
+          setTimeout(this.$.getRequest.generateRequest.bind(this.$.getRequest), GET_INTERVAL);
+        }
+        else {
+          this.fire('get', data);
+          this._setLoading(false);
+        }
+      },
+
+      _onSwap: function(event) {
+        var id = parseInt(event.detail.response);
+
+        if(id == -1) {
+          this.fire('swap-failed');
+          this._setLoading(false);
+        }
+        else {
+          this.$.getRequest.params = { id: id || "" };
+          this.$.getRequest.generateRequest();
+        }
+      },
+
+      _onGetStats: function(event) {
+        var stats = event.detail.response.split(",");
+        this._setSketches(parseInt(stats[0]));
+        this._setArtists(parseInt(stats[1]));
+        this._setPeekers(parseInt(stats[2]));
+      }
+    });
+  })();
+  </script>
+</dom-module>
+
