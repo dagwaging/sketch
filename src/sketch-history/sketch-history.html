@@ -1,0 +1,59 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<script>
+  window.Sketch = window.Sketch || {};
+  Sketch.HistoryBehavior = {
+    properties: {
+      canUndo: {
+        type: Boolean,
+        value: false,
+        notify: true,
+        readOnly: true
+      },
+      canRedo: {
+        type: Boolean,
+        value: false,
+        notify: true,
+        readOnly: true
+      }
+    },
+
+    ready: function() {
+      this.clearHistory();
+    },
+
+    pushHistory: function(action) {
+      this._history.length = this._head;
+      this._history.push(action);
+      this._head++;
+      this._updateHistory();
+    },
+
+    clearHistory: function() {
+      this._history = [];
+      this._head = 0;
+      this._updateHistory();
+    },
+
+    undo: function() {
+      if(this._head > 0) {
+        this._head--;
+        this.fire('undo', this._history[this._head]);
+        this._updateHistory();
+      }
+    },
+
+    redo: function() {
+      if(this._head < this._history.length) {
+        this.fire('redo', this._history[this._head]);
+        this._head++;
+        this._updateHistory();
+      }
+    },
+
+    _updateHistory: function() {
+      this._setCanUndo(this._head > 0);
+      this._setCanRedo(this._head < this._history.length);
+    }
+  };
+</script>
