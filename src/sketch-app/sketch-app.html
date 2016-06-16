@@ -82,7 +82,7 @@
       <paper-icon-button
           title="{{localize('reset')}}"
           icon="delete"
-          disabled="{{_resetDisabled(loading, canUndo)}}"
+          disabled="{{_resetDisabled(sketchDisabled, loading, canUndo)}}"
           on-tap="_reset"></paper-icon-button>
       <paper-icon-button
           title="{{localize('undo')}}"
@@ -199,8 +199,8 @@
         return sketchDisabled || loading;
       },
 
-      _resetDisabled: function(loading, enabled) {
-        return loading || !enabled;
+      _resetDisabled: function(sketchDisabled, loading, enabled) {
+        return loading || (sketchDisabled ? false : !enabled);
       },
 
       _editDisabled: function(sketchDisabled, loading, enabled) {
