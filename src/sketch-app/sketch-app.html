@@ -212,21 +212,27 @@
 
       _saveData: function() {
         if(this.rememberTab) {
-          localStorage.setItem('data' + tabID, this.$.sketch.data);
-          localStorage.setItem('history' + tabID, JSON.stringify(this.$.sketch.$.data.history));
-          localStorage.setItem('head' + tabID, this.$.sketch.$.data.head);
+          var save = {
+            data: this.$.sketch.data,
+            history: this.$.sketch.$.data.history,
+            head: this.$.sketch.$.data.head
+          };
+
+          localStorage.setItem('save' + tabID, JSON.stringify(save));
         }
         else {
-          localStorage.removeItem('data' + tabID);
-          localStorage.removeItem('history' + tabID);
-          localStorage.removeItem('head' + tabID);
+          localStorage.removeItem('save' + tabID);
         }
       },
 
       _restoreData: function() {
-        this.$.sketch.data = localStorage.getItem('data' + tabID) || "";
-        this.$.sketch.$.data.history = JSON.parse(localStorage.getItem('history' + tabID) || "[]");
-        this.$.sketch.$.data.head = localStorage.getItem('head' + tabID) || 0;
+        var save = JSON.parse(localStorage.getItem('save' + tabID));
+
+        if(save) {
+          this.$.sketch.data = save.data;
+          this.$.sketch.$.data.history = save.history;
+          this.$.sketch.$.data.head = save.head;
+        }
       },
 
       // Event handlers for ajax
