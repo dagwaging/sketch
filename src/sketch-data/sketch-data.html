@@ -1,0 +1,84 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<dom-module id="sketch-data">
+  <script>
+    Polymer({
+      is: 'sketch-data',
+
+      ready: function() {
+      },
+
+      // Public properties
+
+      properties: {
+        lines: {
+          type: Array,
+          value: [],
+          notify: true,
+          readOnly: true
+        },
+        length: {
+          type: Number,
+          value: 0,
+          notify: true,
+          readOnly: true
+        },
+        MAX_LENGTH: {
+          type: Number,
+          value: 65535,
+          readOnly: true
+        }
+      },
+
+      get data() {
+        var data = [];
+
+        for(var i = 0; i < this.lines.length; i++) {
+          var line = new Array(this.lines[i].length);
+
+          for(var j in this.lines[i]) {
+            line[j] = this._pad(this.lines[i][j].toString(36), 2);
+          }
+
+          data.push(line.join(""));
+        }
+
+        return data.join(" ");
+      },
+
+      set data(data) {
+        this._setLength(data.length);
+        var lines = data.length > 0 ? data.split(" ") : [];
+        this._setLines(new Array(lines.length));
+
+        for(var i in lines) {
+          var line = new Array(lines[i].length / 2);
+
+          for(var j = 0; j < lines[i].length; j += 2) {
+            line[j / 2] = parseInt(lines[i].substr(j, 2), 36);
+          }
+
+          this.lines[i] = line;
+        }
+      },
+
+      // Public functions
+
+      startLine: function(x, y) {
+        this.push('lines', [x, y]);
+        this._setLength(this.length + 5);
+      },
+
+      addPoint: function(x, y) {
+        this.push('lines.' + (this.lines.length - 1), x, y);
+        this._setLength(this.length + 4);
+      },
+
+      // Private functions
+
+      _pad: function(n, width) {
+        return Math.pow(10, Math.max(0, width - n.length)).toString().substr(1) + n;
+      }
+    });
+  </script>
+</dom-module>

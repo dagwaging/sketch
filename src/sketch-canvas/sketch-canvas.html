@@ -1,5 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../sketch-data/sketch-data.html">
 
 <dom-module id="sketch-canvas">
   <template>
@@ -16,11 +17,10 @@
       }
     </style>
     <canvas id="sketchCanvas" on-track="_onTrack" on-tap="_onTrack" width="800" height="600"></canvas>
+    <sketch-data id="data" length="{{dataLength}}"></sketch-data>
   </template>
   <script>
   (function() {
-    var MAX_DATA_LENGTH = 65535;
-
     Polymer({
       is: 'sketch-canvas',
 
@@ -45,8 +45,7 @@
         dataLength: {
           type: Number,
           value: 0,
-          notify: true,
-          readOnly: true
+          notify: true
         },
         playing: {
           type: Boolean,
@@ -72,39 +71,14 @@
       },
 
       get data() {
-        var data = [];
-
-        for(var i = 0; i < this._length; i++) {
-          var line = new Array(this._lines[i].length);
-
-          for(var j in this._lines[i]) {
-            line[j] = this._pad(this._lines[i][j].toString(36), 2);
-          }
-
-          data.push(line.join(""));
-        }
-
-        return data.join(" ");
+        return this.$.data.data;
       },
 
       set data(data) {
-        var lines = data.length > 0 ? data.split(" ") : [];
-        this._lines = new Array(lines.length);
-        this._length = this._lines.length;
-        this._setDataLength(data.length);
+        this.$.data.data = data;
+        this._length = this.$.data.lines.length;
         this._setCanUndo(this._length > 0);
         this._setCanRedo(false);
-
-        for(var i in lines) {
-          var line = new Array(lines[i].length / 2);
-
-          for(var j = 0; j < lines[i].length; j += 2) {
-            line[j / 2] = parseInt(lines[i].substr(j, 2), 36);
-          }
-
-          this._lines[i] = line;
-        }
-
         this._render();
       },
 
@@ -115,8 +89,6 @@
       // Private properties
 
       _canvas: null,
-
-      _lines: [],
 
       _length: 0,
 
@@ -147,11 +119,11 @@
         }
 
         this._length--;
-        this._setDataLength(this.dataLength - this._lines[this._length].length * 2 - 1);
+        this.dataLength = (this.dataLength - this.$.data.lines[this._length].length * 2 - 1);
         this._render();
 
         this._setCanUndo(this._length > 0);
-        this._setCanRedo(this._lines.length > 0);
+        this._setCanRedo(this.$.data.lines.length > 0);
       },
 
       redo: function() {
@@ -159,22 +131,22 @@
           return;
         }
 
-        this._setDataLength(this.dataLength + this._lines[this._length].length * 2 + 1);
+        this.dataLength = (this.dataLength + this.$.data.lines[this._length].length * 2 + 1);
         this._length++;
         this._render();
 
-        this._setCanUndo(this._lines.length > 0);
-        this._setCanRedo(this._length < this._lines.length);
+        this._setCanUndo(this.$.data.lines.length > 0);
+        this._setCanRedo(this._length < this.$.data.lines.length);
       },
 
       computeInk: function(dataLength) {
-        return Math.floor(dataLength * 100 / MAX_DATA_LENGTH);
+        return Math.floor(dataLength * 100 / this.$.data.MAX_LENGTH);
       },
 
       // Private methods
 
       _onTrack: function(event) {
-        if(this.disabled || this.dataLength >= MAX_DATA_LENGTH) {
+        if(this.disabled || this.dataLength >= this.$.data.MAX_LENGTH) {
           return;
         }
 
@@ -203,16 +175,14 @@
       },
 
       _startLine(x, y) {
-        this._lines.length = this._length;
-        this._lines.push([x, y]);
-        this._setDataLength(this.dataLength + 5);
+        this.$.data.lines.length = this._length;
         this._length++;
+        this.$.data.startLine(x, y);
       },
 
       _addPoint(x, y) {
-        var lastLine = this._lines[this._lines.length - 1];
-        lastLine.push(x, y);
-        this._setDataLength(this.dataLength + 4);
+        this.$.data.addPoint(x, y);
+        var lastLine = this.$.data.lines[this.$.data.lines.length - 1];
         this._drawLine(lastLine.slice(lastLine.length - 4, lastLine.length));
       },
 
@@ -244,14 +214,14 @@
           var pointsDrawn = 0;
 
           while(pointsDrawn < pointsToDraw && this.playing) {
-            this._drawLine(this._lines[this._playProgressLines].slice(this._playProgressPoints, this._playProgressPoints + 4));
+            this._drawLine(this.$.data.lines[this._playProgressLines].slice(this._playProgressPoints, this._playProgressPoints + 4));
 
             pointsDrawn++;
             this._playProgressPoints += 2;
-            if(this._playProgressPoints >= this._lines[this._playProgressLines].length - 2) {
+            if(this._playProgressPoints >= this.$.data.lines[this._playProgressLines].length - 2) {
               this._playProgressPoints = 0;
               this._playProgressLines++;
-              if(this._playProgressLines >= this._lines.length) {
+              if(this._playProgressLines >= this.$.data.lines.length) {
                 break;
               }
             }
@@ -260,7 +230,7 @@
 
         this._lastTimestamp = timestamp;
 
-        if(this.playing && this._playProgressLines < this._lines.length) {
+        if(this.playing && this._playProgressLines < this.$.data.lines.length) {
           window.requestAnimationFrame(this._animate.bind(this));
         }
       },
@@ -269,12 +239,8 @@
         this._clear();
 
         for(var i = 0; i < this._length; i++) {
-          this._drawLine(this._lines[i]);
+          this._drawLine(this.$.data.lines[i]);
         }
-      },
-
-      _pad: function(n, width) {
-        return Math.pow(10, Math.max(0, width - n.length)).toString().substr(1) + n;
       }
     });
   })();
