@@ -34,6 +34,7 @@
       is: 'sketch-canvas',
 
       ready: function() {
+        Polymer.Gestures.gestures.track.hasMovedEnough = function() { return true; };
         this._canvas = this.$.sketchCanvas.getContext("2d");
         this._canvas.strokeStyle = "black";
         this._canvas.lineWidth = 3;
