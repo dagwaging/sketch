@@ -64,14 +64,25 @@
 
       // Public functions
 
-      startLine: function(x, y) {
-        this.push('lines', [x, y]);
-        this._setLength(this.length + 5);
+      addLine: function(line) {
+        if(this.length < this.MAX_LENGTH) {
+          this.push('lines', line);
+          this._setLength(this.length + line.length * 2 + 1);
+        }
       },
 
       addPoint: function(x, y) {
-        this.push('lines.' + (this.lines.length - 1), x, y);
-        this._setLength(this.length + 4);
+        if(this.length < this.MAX_LENGTH) {
+          this.push('lines.' + (this.lines.length - 1), x, y);
+          this._setLength(this.length + 4);
+        }
+      },
+
+      removeLine: function() {
+        if(this.lines.length > 0) {
+          var line = this.pop('lines');
+          this._setLength(this.length - line.length * 2 - 1);
+        }
       },
 
       // Private functions

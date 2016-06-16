@@ -1,6 +1,7 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-styles/shadow.html">
 <link rel="import" href="../sketch-data/sketch-data.html">
+<link rel="import" href="../sketch-history/sketch-history.html">
 
 <dom-module id="sketch-canvas">
   <template>
@@ -33,6 +34,15 @@
         this._canvas.fillStyle = "black";
       },
 
+      behaviors: [
+        Sketch.HistoryBehavior
+      ],
+
+      listeners: {
+        'undo': '_onUndo',
+        'redo': '_onRedo'
+      },
+
       // Public properties
 
       properties: {
@@ -41,11 +51,6 @@
           notify: true,
           readOnly: true,
           computed: 'computeInk(dataLength)'
-        },
-        dataLength: {
-          type: Number,
-          value: 0,
-          notify: true
         },
         playing: {
           type: Boolean,
@@ -56,18 +61,6 @@
           type: Boolean,
           notify: true,
           value: false
-        },
-        canUndo: {
-          type: Boolean,
-          notify: true,
-          readOnly: true,
-          value: false
-        },
-        canRedo: {
-          type: Boolean,
-          notify: true,
-          readOnly: true,
-          value: false
         }
       },
 
@@ -76,10 +69,8 @@
       },
 
       set data(data) {
+        this.clearHistory();
         this.$.data.data = data;
-        this._length = this.$.data.lines.length;
-        this._setCanUndo(this._length > 0);
-        this._setCanRedo(false);
         this._render();
       },
 
@@ -90,8 +81,6 @@
       // Private properties
 
       _canvas: null,
-
-      _length: 0,
 
       _playProgressLines: 0,
 
@@ -114,30 +103,18 @@
         this._setPlaying(false);
       },
 
-      undo: function() {
-        if(!this.canUndo || this.disabled) {
-          return;
+      _onUndo: function(event) {
+        if(!this.disabled) {
+          this.$.data.removeLine();
+          this._render();
         }
-
-        this._length--;
-        this.dataLength = (this.dataLength - this.$.data.lines[this._length].length * 2 - 1);
-        this._render();
-
-        this._setCanUndo(this._length > 0);
-        this._setCanRedo(this.$.data.lines.length > 0);
       },
 
-      redo: function() {
-        if(!this.canRedo || this.disabled) {
-          return;
+      _onRedo: function(event) {
+        if(!this.disabled) {
+          this.$.data.addLine(event.detail);
+          this._render();
         }
-
-        this.dataLength = (this.dataLength + this.$.data.lines[this._length].length * 2 + 1);
-        this._length++;
-        this._render();
-
-        this._setCanUndo(this.$.data.lines.length > 0);
-        this._setCanRedo(this._length < this.$.data.lines.length);
       },
 
       computeInk: function(dataLength) {
@@ -147,44 +124,43 @@
       // Private methods
 
       _onTrack: function(event) {
-        if(this.disabled || this.dataLength >= this.$.data.MAX_LENGTH) {
-          return;
-        }
+        if(!this.disabled) {
+          var x = Math.round(800.0 * event.detail.sourceEvent.offsetX / event.srcElement.offsetWidth);
+          var y = Math.round(600.0 * event.detail.sourceEvent.offsetY / event.srcElement.offsetHeight);
 
-        var x = Math.round(800.0 * event.detail.sourceEvent.offsetX / event.srcElement.offsetWidth);
-        var y = Math.round(600.0 * event.detail.sourceEvent.offsetY / event.srcElement.offsetHeight);
-
-        if(event.type == 'track') {
-          switch(event.detail.state) {
-            case 'start':
-              this._setCanUndo(true);
-              this._setCanRedo(false);
-              this._startLine(x, y);
-              break;
-            case 'track':
-            case 'end':
-              this._addPoint(x, y);
-              break;
+          if(event.type == 'track') {
+            switch(event.detail.state) {
+              case 'start':
+                this._startLine(x, y);
+                break;
+              case 'track':
+                this._addPoint(x, y);
+                break;
+              case 'end':
+                this._endLine(x, y);
+                break;
+            }
           }
-        }
-        else if(event.type == 'tap') {
-          this._setCanUndo(true);
-          this._setCanRedo(false);
-          this._startLine(x, y);
-          this._addPoint(x, y);
+          else if(event.type == 'tap') {
+            this._startLine(x, y);
+            this._endLine(x, y);
+          }
         }
       },
 
       _startLine(x, y) {
-        this.$.data.lines.length = this._length;
-        this._length++;
-        this.$.data.startLine(x, y);
+        this.$.data.addLine([x, y]);
       },
 
       _addPoint(x, y) {
         this.$.data.addPoint(x, y);
         var lastLine = this.$.data.lines[this.$.data.lines.length - 1];
         this._drawLine(lastLine.slice(lastLine.length - 4, lastLine.length));
+      },
+
+      _endLine(x, y) {
+        this._addPoint(x, y);
+        this.pushHistory(this.$.data.lines[this.$.data.lines.length - 1]);
       },
 
       _drawLine(points) {
@@ -239,7 +215,7 @@
       _render() {
         this._clear();
 
-        for(var i = 0; i < this._length; i++) {
+        for(var i in this.$.data.lines) {
           this._drawLine(this.$.data.lines[i]);
         }
       }
