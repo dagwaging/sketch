@@ -26,14 +26,14 @@
         position: relative;
       }
 
-      #stats.title {
-        @apply(--layout-horizontal);
+      .title span {
+        margin: 8px;
         line-height: normal;
       }
 
-      #stats > div {
+      .title .stats {
         display: inline-block;
-        margin: 8px;
+        float: right;
       }
 
       paper-fab {
@@ -52,11 +52,7 @@
         height: 100%;
       }
 
-      #ink {
-        flex-grow: 1;
-      }
-
-      #progress {
+      paper-toolbar > paper-progress {
         top: 0;
       }
     </style>
@@ -71,7 +67,6 @@
               disabled="{{sketchDisabled}}"></sketch-canvas>
       </fit-ratio-container>
       <paper-fab
-          id="swap"
           title="{{localize('swap')}}"
           icon="send"
           disabled="{{_swapDisabled(sketchDisabled, loading)}}"
@@ -81,49 +76,44 @@
     <paper-toolbar>
       <paper-progress
           class="fit"
-          id="progress"
           hidden="{{!loading}}"
           indeterminate></paper-progress>
 
       <paper-icon-button
-          id="reset"
           title="{{localize('reset')}}"
           icon="delete"
           disabled="{{_resetDisabled(loading, canUndo)}}"
           on-tap="_reset"></paper-icon-button>
       <paper-icon-button
-          id="undo"
           title="{{localize('undo')}}"
           icon="undo"
           disabled="{{_editDisabled(sketchDisabled, loading, canUndo)}}"
           on-tap="_undo"></paper-icon-button>
       <paper-icon-button
-          id="redo"
           title="{{localize('redo')}}"
           icon="redo"
           disabled="{{_editDisabled(sketchDisabled, loading, canRedo)}}"
           on-tap="_redo"></paper-icon-button>
 
-      <div id="stats" class="title">
-        <div id="ink">{{localize('ink', 'amount', ink)}}</div>
-        <div id="sketches">{{localize('sketches', 'num', sketches)}}</div>
-        <div id="artists">{{localize('artists', 'num', artists)}}</div>
-        <div id="peekers">{{localize('peekers', 'num', peekers)}}</div>
+      <div class="title">
+        <span>{{localize('ink', 'amount', ink)}}</span>
+        <div class="stats">
+          <span>{{localize('sketches', 'num', sketches)}}</span>
+          <span>{{localize('artists', 'num', artists)}}</span>
+          <span>{{localize('peekers', 'num', peekers)}}</span>
+        </div>
       </div>
 
       <paper-icon-button
-          id="peek"
           title="{{localize('peek')}}"
           icon="visibility"
           disabled="{{loading}}"
           on-tap="_peek"></paper-icon-button>
       <paper-icon-button
-          id="gallery"
           title="{{localize('viewGallery')}}"
           icon="view-module"
           on-tap="_viewGallery"></paper-icon-button>
       <paper-icon-button
-          id="save"
           title="{{localize('save')}}"
           icon="save"
           on-tap="_save"></paper-icon-button>
