@@ -1,4 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/app-localize-behavior/app-localize-behavior.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
@@ -65,7 +66,7 @@
       </fit-ratio-container>
       <paper-fab
           id="swap"
-          title="Swap"
+          title="{{localize('swap')}}"
           icon="send"
           on-tap="_swap"></paper-fab>
     </div>
@@ -73,51 +74,49 @@
       <paper-progress class="fit" id="progress" hidden="{{!loading}}" indeterminate></paper-progress>
       <paper-icon-button
           id="reset"
-          title="Reset"
+          title="{{localize('reset')}}"
           icon="delete"
           on-tap="_reset"></paper-icon-button>
       <paper-icon-button
           id="undo"
-          title="Undo"
+          title="{{localize('undo')}}"
           icon="undo"
           disabled="{{!canUndo}}"
           on-tap="_undo"></paper-icon-button>
       <paper-icon-button
           id="redo"
-          title="Redo"
+          title="{{localize('redo')}}"
           icon="redo"
           disabled="{{!canRedo}}"
           on-tap="_redo"></paper-icon-button>
       <div id="stats" class="title">
-        <div id="ink">{{ink}}% ink used</div>
-        <div id="sketches">{{sketches}} sketches</div>
-        <div id="artists">{{artists}} artists</div>
-        <div id="peekers">{{peekers}} peekers</div>
+        <div id="ink">{{localize('ink', 'amount', ink)}}</div>
+        <div id="sketches">{{localize('sketches', 'num', sketches)}}</div>
+        <div id="artists">{{localize('artists', 'num', artists)}}</div>
+        <div id="peekers">{{localize('peekers', 'num', peekers)}}</div>
       </div>
       <paper-icon-button
           id="peek"
-          title="Peek"
+          title="{{localize('peek')}}"
           icon="visibility"
           on-tap="_peek"></paper-icon-button>
       <paper-icon-button
           id="gallery"
-          title="View gallery"
+          title="{{localize('viewGallery')}}"
           icon="view-module"
           on-tap="_viewGallery"></paper-icon-button>
       <paper-icon-button
           id="save"
-          title="Save"
+          title="{{localize('save')}}"
           icon="save"
           on-tap="_save"></paper-icon-button>
     </paper-toolbar>
     <paper-dialog id="resetDialog" on-iron-overlay-closed="_doReset" with-backdrop>
-      <h2>Are you sure?</h2>
-      <p>
-        You will lose your current drawing
-      </p>
+        <h2>{{localize('resetDialogTitle')}}</h2>
+      <p>{{localize('resetDialogContent')}}</p>
       <div class="buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button dialog-confirm autofocus>Reset</paper-button>
+          <paper-button dialog-dismiss>{{localize('cancel')}}</paper-button>
+          <paper-button dialog-confirm autofocus>{{localize('reset')}}</paper-button>
       </div>
     </paper-dialog>
     <iron-a11y-keys target="[[target]]" keys="ctrl+z" on-keys-pressed="_undo"></iron-a11y-keys>
@@ -138,6 +137,10 @@
     Polymer({
       is: 'sketch-app',
 
+      behaviors: [
+        Polymer.AppLocalizeBehavior
+      ],
+
       ready: function() {
         setInterval(this._saveData.bind(this), 10000);
 
@@ -147,6 +150,10 @@
         this._restoreData();
         window.addEventListener('beforeunload', this._saveData.bind(this));
       },
+  
+      attached: function() {
+        this.loadResources(this.resolveUrl('locales.json'));
+      },
 
       // Public properties
 
@@ -154,6 +161,9 @@
         target: {
           type: Object,
           value: document.body
+        },
+        language: {
+          value: 'en'
         }
       },
 

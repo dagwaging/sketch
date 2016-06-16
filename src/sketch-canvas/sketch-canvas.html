@@ -140,7 +140,7 @@
       },
 
       computeInk: function(dataLength) {
-        return Math.floor(dataLength * 100 / this.$.data.MAX_LENGTH);
+        return dataLength / this.$.data.MAX_LENGTH;
       },
 
       // Private methods
