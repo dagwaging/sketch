@@ -1,0 +1,54 @@
+<script>
+  window.Sketch = window.Sketch || {};
+  Sketch.TabBehavior = {
+    created: function() {
+        this._trackTabOpen();
+        window.addEventListener('beforeunload', this._trackTabClose.bind(this));
+    },
+
+    properties: {
+      rememberTab: {
+        type: Boolean,
+        value: false
+      }
+    },
+
+    _trackTabOpen: function() {
+      if(!window.tabID) {
+        var tabs = JSON.parse(localStorage.getItem('tabs') || "{}");
+        window.tabID = -1;
+
+        for(var id in tabs) {
+          if(!tabs[id]) {
+            window.tabID = id;
+            break;
+          }
+        }
+
+        if(window.tabID == -1) {
+          window.tabID = 0;
+          while(tabs[window.tabID]) {
+            window.tabID++;
+          }
+        }
+
+        tabs[window.tabID] = true;
+        localStorage.setItem('tabs', JSON.stringify(tabs));
+      }
+    },
+
+    _trackTabClose: function() {
+      var tabs = JSON.parse(localStorage.getItem('tabs') || "{}");
+
+      if(this.rememberTab) {
+        tabs[window.tabID] = false;
+      }
+      else {
+        delete tabs[window.tabID];
+      }
+
+      localStorage.setItem('tabs', JSON.stringify(tabs));
+    }
+  };
+</script>
+

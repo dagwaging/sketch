@@ -12,6 +12,7 @@
 <link rel="import" href="../fit-ratio-container/fit-ratio-container.html">
 <link rel="import" href="../sketch-canvas/sketch-canvas.html">
 <link rel="import" href="../sketch-api/sketch-api.html">
+<link rel="import" href="../sketch-tabs/sketch-tabs.html">
 
 <dom-module id="sketch-app">
   <template>
@@ -160,14 +161,12 @@
       is: 'sketch-app',
 
       behaviors: [
-        Polymer.AppLocalizeBehavior
+        Polymer.AppLocalizeBehavior,
+        Sketch.TabBehavior
       ],
 
       ready: function() {
         setInterval(this._saveData.bind(this), 10000);
-
-        this._trackTabOpen();
-        window.addEventListener('beforeunload', this._trackTabClose.bind(this));
 
         this._restoreData();
         window.addEventListener('beforeunload', this._saveData.bind(this));
@@ -186,12 +185,12 @@
         },
         language: {
           value: 'en'
+        },
+        rememberTab: {
+          type: Boolean,
+          computed: "_rememberTab(canUndo)"
         }
       },
-
-      // Private properties
-
-      _tabID: -1,
 
       // Private methods
 
@@ -207,60 +206,27 @@
         return loading || !enabled;
       },
 
-      _trackTabOpen: function() {
-        var tabs = JSON.parse(localStorage.getItem('tabs') || "{}");
-
-        for(var id in tabs) {
-          if(!tabs[id]) {
-            this._tabID = id;
-            break;
-          }
-        }
-
-        if(this._tabID == -1) {
-          this._tabID = 0;
-          while(tabs[this._tabID]) {
-            this._tabID++;
-          }
-        }
-
-        tabs[this._tabID] = true;
-        localStorage.setItem('tabs', JSON.stringify(tabs));
-      },
-
-      _trackTabClose: function() {
-        var tabs = JSON.parse(localStorage.getItem('tabs') || "{}");
-        var data = this.$.sketch.disabled ? "" : this.$.sketch.data;
-
-        if(data.length > 0) {
-          tabs[this._tabID] = false;
-        }
-        else {
-          delete tabs[this._tabID];
-        }
-
-        localStorage.setItem('tabs', JSON.stringify(tabs));
+      _rememberTab: function(hasData) {
+        return hasData;
       },
 
       _saveData: function() {
-        var data = this.$.sketch.disabled ? "" : this.$.sketch.data;
-
-        if(data.length > 0) {
-          localStorage.setItem('data' + this._tabID, data);
-          localStorage.setItem('history' + this._tabID, JSON.stringify(this.$.sketch.$.data.history));
-          localStorage.setItem('head' + this._tabID, this.$.sketch.$.data.head);
+        if(this.rememberTab) {
+          localStorage.setItem('data' + tabID, this.$.sketch.data);
+          localStorage.setItem('history' + tabID, JSON.stringify(this.$.sketch.$.data.history));
+          localStorage.setItem('head' + tabID, this.$.sketch.$.data.head);
         }
         else {
-          localStorage.removeItem('data' + this._tabID);
-          localStorage.removeItem('history' + this._tabID);
-          localStorage.removeItem('head' + this._tabID);
+          localStorage.removeItem('data' + tabID);
+          localStorage.removeItem('history' + tabID);
+          localStorage.removeItem('head' + tabID);
         }
       },
 
       _restoreData: function() {
-        this.$.sketch.data = localStorage.getItem('data' + this._tabID) || "";
-        this.$.sketch.$.data.history = JSON.parse(localStorage.getItem('history' + this._tabID) || "[]");
-        this.$.sketch.$.data.head = localStorage.getItem('head' + this._tabID) || 0;
+        this.$.sketch.data = localStorage.getItem('data' + tabID) || "";
+        this.$.sketch.$.data.history = JSON.parse(localStorage.getItem('history' + tabID) || "[]");
+        this.$.sketch.$.data.head = localStorage.getItem('head' + tabID) || 0;
       },
 
       // Event handlers for ajax
