@@ -1,7 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-styles/shadow.html">
 <link rel="import" href="../sketch-data/sketch-data.html">
-<link rel="import" href="../sketch-history/sketch-history.html">
 
 <dom-module id="sketch-canvas">
   <template>
@@ -18,7 +17,7 @@
       }
     </style>
     <canvas id="sketchCanvas" on-track="_onTrack" on-tap="_onTrack" width="800" height="600"></canvas>
-    <sketch-data id="data" length="{{dataLength}}"></sketch-data>
+    <sketch-data id="data" length="{{dataLength}}" can-undo="{{canUndo}}" can-redo="{{canRedo}}"></sketch-data>
   </template>
   <script>
   (function() {
@@ -32,15 +31,6 @@
         this._canvas.lineJoin = "round";
         this._canvas.lineCap = "round";
         this._canvas.fillStyle = "black";
-      },
-
-      behaviors: [
-        Sketch.HistoryBehavior
-      ],
-
-      listeners: {
-        'undo': '_onUndo',
-        'redo': '_onRedo'
       },
 
       // Public properties
@@ -61,6 +51,14 @@
           type: Boolean,
           notify: true,
           value: false
+        },
+        canUndo: {
+          type: Boolean,
+          notify: true
+        },
+        canRedo: {
+          type: Boolean,
+          notify: true
         }
       },
 
@@ -69,7 +67,6 @@
       },
 
       set data(data) {
-        this.clearHistory();
         this.$.data.data = data;
         this._render();
       },
@@ -103,16 +100,16 @@
         this._setPlaying(false);
       },
 
-      _onUndo: function(event) {
+      undo: function(event) {
         if(!this.disabled) {
-          this.$.data.removeLine();
+          this.$.data.undo();
           this._render();
         }
       },
 
-      _onRedo: function(event) {
+      redo: function(event) {
         if(!this.disabled) {
-          this.$.data.addLine(event.detail);
+          this.$.data.redo();
           this._render();
         }
       },
@@ -159,8 +156,9 @@
       },
 
       _endLine(x, y) {
-        this._addPoint(x, y);
-        this.pushHistory(this.$.data.lines[this.$.data.lines.length - 1]);
+        this.$.data.endLine(x, y);
+        var lastLine = this.$.data.lines[this.$.data.lines.length - 1];
+        this._drawLine(lastLine.slice(lastLine.length - 4, lastLine.length));
       },
 
       _drawLine(points) {

@@ -247,8 +247,8 @@
 
         if(data.length > 0) {
           localStorage.setItem('data' + this._tabID, data);
-          localStorage.setItem('history' + this._tabID, JSON.stringify(this.$.sketch._history));
-          localStorage.setItem('head' + this._tabID, this.$.sketch._head);
+          localStorage.setItem('history' + this._tabID, JSON.stringify(this.$.sketch.$.data._history));
+          localStorage.setItem('head' + this._tabID, this.$.sketch.$.data._head);
         }
         else {
           localStorage.removeItem('data' + this._tabID);
@@ -259,8 +259,8 @@
 
       _restoreData: function() {
         this.$.sketch.data = localStorage.getItem('data' + this._tabID) || "";
-        this.$.sketch._history = JSON.parse(localStorage.getItem('history' + this._tabID) || "[]");
-        this.$.sketch._head = localStorage.getItem('head' + this._tabID) || 0;
+        this.$.sketch.$.data._history = JSON.parse(localStorage.getItem('history' + this._tabID) || "[]");
+        this.$.sketch.$.data._head = localStorage.getItem('head' + this._tabID) || 0;
       },
 
       // Event handlers for ajax

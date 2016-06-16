@@ -1,11 +1,18 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../sketch-history/sketch-history.html">
 
 <dom-module id="sketch-data">
   <script>
     Polymer({
       is: 'sketch-data',
 
-      ready: function() {
+      behaviors: [
+        Sketch.HistoryBehavior
+      ],
+
+      listeners: {
+        'undo': '_onUndo',
+        'redo': '_onRedo'
       },
 
       // Public properties
@@ -47,6 +54,7 @@
       },
 
       set data(data) {
+        this.clearHistory();
         this._setLength(data.length);
         var lines = data.length > 0 ? data.split(" ") : [];
         this._setLines(new Array(lines.length));
@@ -78,6 +86,11 @@
         }
       },
 
+      endLine: function(x, y) {
+        this.addPoint(x, y);
+        this.pushHistory(this.lines[this.lines.length - 1]);
+      },
+
       removeLine: function() {
         if(this.lines.length > 0) {
           var line = this.pop('lines');
@@ -86,6 +99,14 @@
       },
 
       // Private functions
+
+      _onUndo: function(event) {
+        this.removeLine();
+      },
+
+      _onRedo: function(event) {
+        this.addLine(event.detail);
+      },
 
       _pad: function(n, width) {
         return Math.pow(10, Math.max(0, width - n.length)).toString().substr(1) + n;
