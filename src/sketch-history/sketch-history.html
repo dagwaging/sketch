@@ -4,6 +4,16 @@
   window.Sketch = window.Sketch || {};
   Sketch.HistoryBehavior = {
     properties: {
+      _history: {
+        type: Array,
+        value: [],
+        observer: '_updateHistory'
+      },
+      _head: {
+        type: Number,
+        value: 0,
+        observer: '_updateHistory'
+      },
       canUndo: {
         type: Boolean,
         value: false,
@@ -16,10 +26,6 @@
         notify: true,
         readOnly: true
       }
-    },
-
-    ready: function() {
-      this.clearHistory();
     },
 
     pushHistory: function(action) {

@@ -66,8 +66,8 @@
 
       addLine: function(line) {
         if(this.length < this.MAX_LENGTH) {
+          this._setLength(this.length + line.length * 2 + (this.lines.length == 0 ? 0 : 1));
           this.push('lines', line);
-          this._setLength(this.length + line.length * 2 + 1);
         }
       },
 
@@ -81,7 +81,7 @@
       removeLine: function() {
         if(this.lines.length > 0) {
           var line = this.pop('lines');
-          this._setLength(this.length - line.length * 2 - 1);
+          this._setLength(this.length - line.length * 2 - (this.lines.length == 0 ? 0 : 1));
         }
       },
 
