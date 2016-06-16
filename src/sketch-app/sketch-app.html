@@ -60,9 +60,15 @@
         top: 0;
       }
     </style>
+
     <div class="content">
       <fit-ratio-container ratio="4/3">
-          <sketch-canvas id="sketch" ink="{{ink}}" can-undo="{{canUndo}}" can-redo="{{canRedo}}" disabled="{{sketchDisabled}}"></sketch-canvas>
+          <sketch-canvas
+              id="sketch"
+              ink="{{ink}}"
+              can-undo="{{canUndo}}"
+              can-redo="{{canRedo}}"
+              disabled="{{sketchDisabled}}"></sketch-canvas>
       </fit-ratio-container>
       <paper-fab
           id="swap"
@@ -71,8 +77,14 @@
           disabled="{{_swapDisabled(sketchDisabled, loading)}}"
           on-tap="_swap"></paper-fab>
     </div>
+
     <paper-toolbar>
-      <paper-progress class="fit" id="progress" hidden="{{!loading}}" indeterminate></paper-progress>
+      <paper-progress
+          class="fit"
+          id="progress"
+          hidden="{{!loading}}"
+          indeterminate></paper-progress>
+
       <paper-icon-button
           id="reset"
           title="{{localize('reset')}}"
@@ -91,12 +103,14 @@
           icon="redo"
           disabled="{{_editDisabled(sketchDisabled, loading, canRedo)}}"
           on-tap="_redo"></paper-icon-button>
+
       <div id="stats" class="title">
         <div id="ink">{{localize('ink', 'amount', ink)}}</div>
         <div id="sketches">{{localize('sketches', 'num', sketches)}}</div>
         <div id="artists">{{localize('artists', 'num', artists)}}</div>
         <div id="peekers">{{localize('peekers', 'num', peekers)}}</div>
       </div>
+
       <paper-icon-button
           id="peek"
           title="{{localize('peek')}}"
@@ -114,6 +128,7 @@
           icon="save"
           on-tap="_save"></paper-icon-button>
     </paper-toolbar>
+
     <paper-dialog id="resetDialog" on-iron-overlay-closed="_doReset" with-backdrop>
         <h2>{{localize('resetDialogTitle')}}</h2>
       <p>{{localize('resetDialogContent')}}</p>
@@ -122,10 +137,24 @@
           <paper-button dialog-confirm autofocus>{{localize('reset')}}</paper-button>
       </div>
     </paper-dialog>
-    <iron-a11y-keys target="[[target]]" keys="ctrl+z" on-keys-pressed="_undo"></iron-a11y-keys>
-    <iron-a11y-keys target="[[target]]" keys="ctrl+y" on-keys-pressed="_redo"></iron-a11y-keys>
-    <iron-a11y-keys target="[[target]]" keys="delete" on-keys-pressed="_reset"></iron-a11y-keys>
-    <iron-a11y-keys target="[[target]]" keys="ctrl+enter" on-keys-pressed="_swap"></iron-a11y-keys>
+
+    <iron-a11y-keys
+        target="[[target]]"
+        keys="ctrl+z"
+        on-keys-pressed="_undo"></iron-a11y-keys>
+    <iron-a11y-keys
+        target="[[target]]"
+        keys="ctrl+y"
+        on-keys-pressed="_redo"></iron-a11y-keys>
+    <iron-a11y-keys
+        target="[[target]]"
+        keys="delete"
+        on-keys-pressed="_reset"></iron-a11y-keys>
+    <iron-a11y-keys
+        target="[[target]]"
+        keys="ctrl+enter"
+        on-keys-pressed="_swap"></iron-a11y-keys>
+
     <sketch-api
         id="api"
         sketches="{{sketches}}"
