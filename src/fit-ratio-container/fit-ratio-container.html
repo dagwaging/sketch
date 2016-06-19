@@ -35,6 +35,16 @@
         }
       },
 
+      _ratio: 1,
+
+      _notifyAll: function(element) {
+        return true;
+      },
+
+      _notifyNone: function(element) {
+        return false;
+      },
+
       _onRatioChanged: function(newValue, oldValue) {
         var parts = newValue.toString().split("/");
 
@@ -45,9 +55,11 @@
         this._onIronResize();
       },
 
-      _ratio: 1,
-
       _onIronResize: function() {
+        if(this.resizerShouldNotify == this._notifyAll) {
+          return;
+        }
+
         var contentWidth = Math.min(this.offsetWidth, this.offsetHeight * this._ratio);
         var contentHeight = Math.min(this.offsetHeight, this.offsetWidth / this._ratio);
 
@@ -56,6 +68,10 @@
 
         this.style.paddingLeft = this.style.paddingRight = horizontalPadding + "px";
         this.style.paddingTop = this.style.paddingBottom = verticalPadding + "px";
+
+        this.resizerShouldNotify = this._notifyAll;
+        this.notifyResize();
+        this.resizerShouldNotify = this._notifyNone;
       }
     });
   </script>
