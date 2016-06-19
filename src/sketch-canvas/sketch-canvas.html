@@ -1,5 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../sketch-data/sketch-data.html">
 
 <dom-module id="sketch-canvas">
@@ -41,6 +42,14 @@
         this._canvas.lineJoin = "round";
         this._canvas.lineCap = "round";
         this._canvas.fillStyle = "black";
+      },
+
+      behaviors: [
+        Polymer.IronResizableBehavior
+      ],
+
+      listeners: {
+        'iron-resize': '_onIronResize'
       },
 
       // Public properties
@@ -97,6 +106,8 @@
 
       _lastTimestamp: null,
 
+      _bounds: null,
+
       // Public methods
 
       play: function() {
@@ -132,10 +143,15 @@
 
       // Private methods
 
+      _onIronResize: function(event) {
+        this._bounds = this.getBoundingClientRect();
+      },
+
       _onTrack: function(event) {
+        event.preventDefault();
         if(!this.disabled) {
-          var x = Math.round(800.0 * event.detail.sourceEvent.offsetX / event.srcElement.offsetWidth);
-          var y = Math.round(600.0 * event.detail.sourceEvent.offsetY / event.srcElement.offsetHeight);
+          var x = Math.round(800.0 * (event.detail.x - this._bounds.left) / this._bounds.width);
+          var y = Math.round(600.0 * (event.detail.y - this._bounds.top) / this._bounds.height);
 
           if(event.type == 'track') {
             switch(event.detail.state) {
