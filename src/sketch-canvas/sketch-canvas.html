@@ -149,7 +149,14 @@
 
       _onTrack: function(event) {
         event.preventDefault();
+
         if(!this.disabled) {
+          event = this._fixInput(event);
+
+          if(event == null) {
+            return;
+          }
+
           var x = Math.round(800.0 * (event.detail.x - this._bounds.left) / this._bounds.width);
           var y = Math.round(600.0 * (event.detail.y - this._bounds.top) / this._bounds.height);
 
@@ -171,6 +178,44 @@
             this._endLine(x, y);
           }
         }
+      },
+
+      _fixInput: function(event) {
+        if(event.type == 'track') {
+          var x = event.detail.x;
+          var y = event.detail.y;
+
+          var dx = event.detail.ddx;
+          var dy = event.detail.ddy;
+
+          var px = x - dx;
+          var py = y - dy;
+
+          var isInBounds = this._contains(this._bounds, x, y);
+          var wasInBounds = this._contains(this._bounds, px, py);
+
+          if(isInBounds) {
+            if(!wasInBounds) {
+              event.detail.state = "start";
+            }
+          }
+          else {
+            if(wasInBounds) {
+              event.detail.state = "end";
+              event.detail.x = px;
+              event.detail.y = py;
+            }
+            else {
+              event = null;
+            }
+          }
+        }
+
+        return event;
+      },
+
+      _contains: function(bounds, x, y) {
+        return x >= bounds.left && x <= bounds.right && y >= bounds.top && y <= bounds.bottom;
       },
 
       _startLine(x, y) {
