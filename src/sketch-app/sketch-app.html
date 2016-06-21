@@ -250,8 +250,10 @@
       // Event handlers for buttons
 
       _swap: function() {
-        this.$.api.swap(this.$.sketch.data);
-        this.sketchDisabled = true;
+        if(!this.sketchDisabled) {
+          this.$.api.swap(this.$.sketch.data);
+          this.sketchDisabled = true;
+        }
       },
 
       _undo: function() {
