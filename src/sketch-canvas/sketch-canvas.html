@@ -163,25 +163,34 @@
             return;
           }
 
-          var x = Math.round(800.0 * (event.detail.x - this._bounds.left) / this._bounds.width);
-          var y = Math.round(600.0 * (event.detail.y - this._bounds.top) / this._bounds.height);
+          var point = this._scaleCoordinates(this._bounds, event.detail.x, event.detail.y, 800, 600);
+          var x = point[0];
+          var y = point[1];
 
-          if(event.type == 'track') {
-            switch(event.detail.state) {
-              case 'start':
-                this._startLine(x, y);
-                break;
-              case 'track':
-                this._addPoint(x, y);
-                break;
-              case 'end':
-                this._endLine(x, y);
-                break;
-            }
+          if(this.erasing) {
+            var previousPoint = this._scaleCoordinates(this._bounds, event.detail.x - event.detail.ddx || 0, event.detail.y - event.detail.ddy || 0, 800, 600);
+            var px = previousPoint[0];
+            var py = previousPoint[1];
+            this._erase(x, y, px, py);
           }
-          else if(event.type == 'tap') {
-            this._startLine(x, y);
-            this._endLine(x, y);
+          else {
+            if(event.type == 'track') {
+              switch(event.detail.state) {
+                case 'start':
+                  this._startLine(x, y);
+                  break;
+                case 'track':
+                  this._addPoint(x, y);
+                  break;
+                case 'end':
+                  this._endLine(x, y);
+                  break;
+              }
+            }
+            else if(event.type == 'tap') {
+              this._startLine(x, y);
+              this._endLine(x, y);
+            }
           }
         }
       },
@@ -203,6 +212,7 @@
           if(isInBounds) {
             if(!wasInBounds) {
               event.detail.state = "start";
+              // TODO: insert additional 'start' event on border
             }
           }
           else {
@@ -210,6 +220,7 @@
               event.detail.state = "end";
               event.detail.x = px;
               event.detail.y = py;
+              // TODO: move event to border
             }
             else {
               event = null;
@@ -222,6 +233,12 @@
 
       _contains: function(bounds, x, y) {
         return x >= bounds.left && x <= bounds.right && y >= bounds.top && y <= bounds.bottom;
+      },
+
+      _scaleCoordinates: function(bounds, x, y, width, height) {
+          x = Math.round(width * (x - bounds.left) / bounds.width);
+          y = Math.round(height * (y - bounds.top) / bounds.height);
+          return [x, y];
       },
 
       _startLine(x, y) {
@@ -238,6 +255,10 @@
         this.$.data.endLine(x, y);
         var lastLine = this.$.data.lines[this.$.data.lines.length - 1];
         this._drawLine(lastLine.slice(lastLine.length - 4, lastLine.length));
+      },
+
+      _erase(x, y, px, py) {
+        this.$.data.erase(x, y, px, py, 3);
       },
 
       _drawLine(points) {
