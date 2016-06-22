@@ -4,6 +4,8 @@
     "reset": "Reset",
     "undo": "Undo",
     "redo": "Redo",
+    "eraser": "Eraser",
+    "pen": "Pen",
     "peek": "Peek",
     "viewGallery": "View gallery",
     "save": "Save",
