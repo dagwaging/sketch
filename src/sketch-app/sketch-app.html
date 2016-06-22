@@ -58,6 +58,10 @@
       paper-toolbar paper-progress.fit {
         top: 0;
       }
+
+      paper-icon-button[toggles]:not([active]) {
+        color: var(--light-theme-divider-color);
+      }
     </style>
 
     <div class="content">
@@ -65,6 +69,7 @@
           <sketch-canvas
               id="sketch"
               ink="{{ink}}"
+              erasing="{{erasing}}"
               can-undo="{{canUndo}}"
               can-redo="{{canRedo}}"
               disabled="{{sketchDisabled}}"></sketch-canvas>
@@ -101,11 +106,15 @@
           title="{{localize('eraser')}}"
           icon="mdi:eraser-variant"
           disabled="{{_swapDisabled(sketchDisabled, loading)}}"
+          active="{{erasing}}"
+          toggles
           on-tap="_erase"></paper-icon-button>
       <paper-icon-button
           title="{{localize('pen')}}"
           icon="create"
           disabled="{{_swapDisabled(sketchDisabled, loading)}}"
+          active="{{!erasing}}"
+          toggles
           on-tap="_draw"></paper-icon-button>
 
       <div class="title">
@@ -157,6 +166,14 @@
         target="[[target]]"
         keys="delete"
         on-keys-pressed="_reset"></iron-a11y-keys>
+    <iron-a11y-keys
+        target="[[target]]"
+        keys="e"
+        on-keys-pressed="_erase"></iron-a11y-keys>
+    <iron-a11y-keys
+        target="[[target]]"
+        keys="p"
+        on-keys-pressed="_draw"></iron-a11y-keys>
     <iron-a11y-keys
         target="[[target]]"
         keys="ctrl+enter"
@@ -290,11 +307,11 @@
       },
 
       _erase: function() {
-        // TODO
+        this.$.sketch.erasing = true;
       },
 
       _draw: function() {
-        // TODO
+        this.$.sketch.erasing = false;
       },
 
       _reset: function() {
