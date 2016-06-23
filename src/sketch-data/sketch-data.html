@@ -128,14 +128,50 @@
       },
 
       _doAction: function(action) {
+        var oldLength = this.lines.length;
+
         for(var i in action) {
           Array.prototype.splice.apply(this.lines, [action[i].start, action[i].removed.length].concat(action[i].added));
+
+          for(var j in action[i].added) {
+            this._setLength(this.length + action[i].added[j].length * 2 + 1);
+          }
+
+          for(var j in action[i].removed) {
+            this._setLength(this.length - action[i].removed[j].length * 2 - 1);
+          }
+        }
+
+        if(oldLength == 0 && this.lines.length > 0) {
+          this._setLength(this.length - 1);
+        }
+
+        if(oldLength > 0 && this.lines.length == 0) {
+          this._setLength(0);
         }
       },
 
       _undoAction: function(action) {
+        var oldLength = this.lines.length;
+
         for(var i in action) {
           Array.prototype.splice.apply(this.lines, [action[i].start, action[i].added.length].concat(action[i].removed));
+
+          for(var j in action[i].added) {
+            this._setLength(this.length - action[i].added[j].length * 2 - 1);
+          }
+
+          for(var j in action[i].removed) {
+            this._setLength(this.length + action[i].removed[j].length * 2 + 1);
+          }
+        }
+
+        if(oldLength == 0 && this.lines.length > 0) {
+          this._setLength(this.length - 1);
+        }
+
+        if(oldLength > 0 && this.lines.length == 0) {
+          this._setLength(0);
         }
       },
 
