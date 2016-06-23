@@ -12,9 +12,6 @@
     "ink": "{amount, number, percent} ink used",
     "sketches": "{num, plural, one {# sketch} other {# sketches}}",
     "artists": "{num, plural, one {# artist} other {# artists}}",
-    "peekers": "{num, plural, one {# peeker} other {# peekers}}",
-    "resetDialogTitle": "Are you sure?",
-    "resetDialogContent": "You will lose your current drawing",
-    "cancel": "Cancel"
+    "peekers": "{num, plural, one {# peeker} other {# peekers}}"
   }
 }

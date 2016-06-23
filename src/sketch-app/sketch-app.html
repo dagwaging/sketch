@@ -1,7 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/app-localize-behavior/app-localize-behavior.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
@@ -140,15 +139,6 @@
           icon="save"
           on-tap="_save"></paper-icon-button>
     </paper-toolbar>
-
-    <paper-dialog id="resetDialog" on-iron-overlay-closed="_doReset" with-backdrop>
-        <h2>{{localize('resetDialogTitle')}}</h2>
-      <p>{{localize('resetDialogContent')}}</p>
-      <div class="buttons">
-          <paper-button dialog-dismiss>{{localize('cancel')}}</paper-button>
-          <paper-button dialog-confirm autofocus>{{localize('reset')}}</paper-button>
-      </div>
-    </paper-dialog>
 
     <iron-a11y-keys
         target="[[target]]"
@@ -316,22 +306,11 @@
       },
 
       _reset: function() {
-        if(this.$.sketch.disabled) {
-          this._doReset();
-          this.$.sketch.$.data.clearHistory();
-        }
-        else {
-          this.$.resetDialog.open();
-        }
-      },
-
-      _doReset: function(event) {
-        if(event && (event.detail.canceled || !event.detail.confirmed)) {
-          return;
-        }
-
         this.$.sketch.stop();
         this.$.sketch.data = "";
+        if(this.sketchDisabled) {
+          this.$.sketch.$.data.clearHistory();
+        }
         this.sketchDisabled = false;
       },
 
