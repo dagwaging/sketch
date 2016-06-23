@@ -231,7 +231,7 @@
         },
         rememberTab: {
           type: Boolean,
-          computed: "_rememberTab(canUndo)"
+          computed: "_rememberTab(sketchDisabled, ink)"
         }
       },
 
@@ -249,8 +249,8 @@
         return loading || !enabled;
       },
 
-      _rememberTab: function(hasData) {
-        return hasData;
+      _rememberTab: function(disabled, ink) {
+          return !disabled && ink > 0;
       },
 
       _saveData: function() {
