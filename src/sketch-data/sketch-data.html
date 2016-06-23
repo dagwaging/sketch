@@ -54,7 +54,7 @@
       },
 
       set data(data) {
-        this.clearHistory();
+        var oldLines = this.lines.slice();
         this._setLength(data.length);
         var lines = data.length > 0 ? data.split(" ") : [];
         this._setLines(new Array(lines.length));
@@ -68,6 +68,14 @@
 
           this.lines[i] = line;
         }
+
+        var action = [{
+          start: 0,
+          added: this.lines.slice(),
+          removed: oldLines
+        }];
+
+        this.pushHistory(action);
       },
 
       // Public functions
@@ -88,7 +96,14 @@
 
       endLine: function(x, y) {
         this.addPoint(x, y);
-        this.pushHistory(this.lines[this.lines.length - 1]);
+
+        var action = [{
+          start: this.lines.length - 1,
+          added: [this.lines[this.lines.length - 1]],
+          removed: []
+        }];
+
+        this.pushHistory(action);
       },
 
       erase: function(x, y, px, py, radius) {
@@ -105,11 +120,23 @@
       // Private functions
 
       _onUndo: function(event) {
-        this.removeLine();
+        this._undoAction(event.detail);
       },
 
       _onRedo: function(event) {
-        this.addLine(event.detail);
+        this._doAction(event.detail);
+      },
+
+      _doAction: function(action) {
+        for(var i in action) {
+          Array.prototype.splice.apply(this.lines, [action[i].start, action[i].removed.length].concat(action[i].added));
+        }
+      },
+
+      _undoAction: function(action) {
+        for(var i in action) {
+          Array.prototype.splice.apply(this.lines, [action[i].start, action[i].added.length].concat(action[i].removed));
+        }
       },
 
       _pad: function(n, width) {

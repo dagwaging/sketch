@@ -286,6 +286,7 @@
 
       _onGet: function(data) {
         this.$.sketch.data = data.detail;
+        this.$.sketch.$.data.clearHistory();
         this.$.sketch.play();
       },
 
@@ -317,6 +318,7 @@
       _reset: function() {
         if(this.$.sketch.disabled) {
           this._doReset();
+          this.$.sketch.$.data.clearHistory();
         }
         else {
           this.$.resetDialog.open();
