@@ -5,26 +5,26 @@
   <template>
     <iron-ajax
         id="getStatsRequest"
-        url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/getStats.php?timespan=300"
+        url="https://cors-dagwaging.herokuapp.com/http://garyc.me/sketch/getStats.php?timespan=300"
         handle-as="text"
         on-response="_onGetStats"></iron-ajax>
     <iron-ajax
         id="getMaxIDRequest"
-        url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/getMaxID.php"
+        url="https://cors-dagwaging.herokuapp.com/http://garyc.me/sketch/getMaxID.php"
         handle-as="text"
         on-response="_onSwap"></iron-ajax>
     <iron-ajax
         id="swapRequest"
-        url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/swap.php?v=32"
+        url="https://cors-dagwaging.herokuapp.com/http://garyc.me/sketch/swap.php?v=32"
         method="POST"
         handle-as="text"
         on-response="_onSwap"></iron-ajax>
     <iron-ajax
         id="getRequest"
-        url="http://cors-dagwaging.rhcloud.com/garyc.me/sketch/get.php"
+        url="https://cors-dagwaging.herokuapp.com/http://garyc.me/sketch/get.php"
         handle-as="text"
         on-response="_onGet"></iron-ajax>
-    <form id="saveForm" action="http://cors-dagwaging.rhcloud.com/download/sketch.png" method="POST">
+    <form id="saveForm" action="" method="POST">
       <input type="hidden" id="saveData" name="data" />
     </form>
   </template>
