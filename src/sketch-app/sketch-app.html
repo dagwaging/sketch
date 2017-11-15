@@ -140,6 +140,10 @@
         on-keys-pressed="_redo"></iron-a11y-keys>
     <iron-a11y-keys
         target="[[target]]"
+        keys="ctrl+s"
+        on-keys-pressed="_save"></iron-a11y-keys>
+    <iron-a11y-keys
+        target="[[target]]"
         keys="delete"
         on-keys-pressed="_reset"></iron-a11y-keys>
     <iron-a11y-keys
@@ -171,6 +175,9 @@
 
         this._restoreData();
         window.addEventListener('beforeunload', this._saveData.bind(this));
+
+        // Prevent Chrome from capturing CTRL+S
+        window.addEventListener('keydown', function(event) { event.preventDefault(); });
       },
   
       attached: function() {
