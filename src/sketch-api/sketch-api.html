@@ -24,9 +24,6 @@
         url="https://cors-dagwaging.herokuapp.com/http://garyc.me/sketch/get.php"
         handle-as="text"
         on-response="_onGet"></iron-ajax>
-    <form id="saveForm" action="" method="POST">
-      <input type="hidden" id="saveData" name="data" />
-    </form>
   </template>
   <script>
   (function() {
@@ -84,8 +81,10 @@
       },
 
       save: function(data) {
-        this.$.saveData.value = data;
-        this.$.saveForm.submit();
+        var a = document.createElement('a');
+        a.setAttribute('download', 'sketch.png');
+        a.href = data;
+        a.click();
       },
 
       // Private functions
