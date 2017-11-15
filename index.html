@@ -11,6 +11,10 @@
     <link rel="import" href="src/sketch-app/sketch-app.html">
     <style is="custom-style">
       :root {
+        @apply(--layout-fit);
+        position: fixed;
+        margin: 0;
+
         --primary-color: #980706;
         //--light-primary-color: var(--paper-red-500);
         //--dark-primary-color: var(--paper-red-900);
@@ -23,7 +27,7 @@
       }
     </style>
   </head>
-  <body class="fullbleed">
+  <body>
     <sketch-app></sketch-app>
   </body>
 </html>
