@@ -104,9 +104,8 @@
       _onSwap: function(event) {
         var id = parseInt(event.detail.response);
 
-        if(id == -1) {
-          this.fire('swap-failed');
-          this._setLoading(false);
+        if(id < 0) {
+          setTimeout(this.$.swapRequest.generateRequest.bind(this.$.swapRequest), (1 - id) * 1000);
         }
         else {
           this.$.getRequest.params = { id: id || "" };
