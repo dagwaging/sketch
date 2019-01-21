@@ -156,41 +156,53 @@
       _onTrack: function(event) {
         event.preventDefault();
 
-        if(!this.disabled) {
-          event = this._fixInput(event);
+        if(this.disabled) {
+          return;
+        }
 
-          if(event == null) {
-            return;
+        event = this._fixInput(event);
+
+        if(event == null) {
+          return;
+        }
+
+        var point = this._scaleCoordinates(this._bounds, event.detail.x, event.detail.y, 800, 600);
+        var x = point[0];
+        var y = point[1];
+
+        var previousPoint = this._scaleCoordinates(this._bounds, event.detail.x - event.detail.ddx || 0, event.detail.y - event.detail.ddy || 0, 800, 600);
+        var px = previousPoint[0];
+        var py = previousPoint[1];
+
+        if(this.erasing) {
+
+          if(event.type == 'tap' || event.type =='track' && event.detail.state == 'start') {
+            this._eraseStart();
           }
 
-          var point = this._scaleCoordinates(this._bounds, event.detail.x, event.detail.y, 800, 600);
-          var x = point[0];
-          var y = point[1];
-
-          if(this.erasing) {
-            var previousPoint = this._scaleCoordinates(this._bounds, event.detail.x - event.detail.ddx || 0, event.detail.y - event.detail.ddy || 0, 800, 600);
-            var px = previousPoint[0];
-            var py = previousPoint[1];
+          if(event.type == 'tap' || event.type == 'track') {
             this._erase(x, y, px, py);
           }
-          else {
-            if(event.type == 'track') {
-              switch(event.detail.state) {
-                case 'start':
-                  this._startLine(x, y);
-                  break;
-                case 'track':
-                  this._addPoint(x, y);
-                  break;
-                case 'end':
-                  this._endLine(x, y);
-                  break;
-              }
+
+          if(event.type == 'tap' || event.type == 'track' && event.detail.state == 'end') {
+            this._eraseEnd();
+          }
+        }
+        else {
+          if(event.type == 'tap' || event.type =='track' && event.detail.state == 'start') {
+            this._drawStart();
+          }
+
+          if(event.type == 'tap' || event.type == 'track') {
+            this._draw(x, y, px, py);
+
+            if(event.type == 'tap') {
+              this._draw(x, y, px, py);
             }
-            else if(event.type == 'tap') {
-              this._startLine(x, y);
-              this._endLine(x, y);
-            }
+          }
+
+          if(event.type == 'tap' || event.type == 'track' && event.detail.state == 'end') {
+            this._drawEnd();
           }
         }
       },
@@ -241,24 +253,31 @@
           return [x, y];
       },
 
-      _startLine(x, y) {
-        this.$.data.addLine([x, y]);
+      _drawStart() {
+        this.$.data.drawStart();
       },
 
-      _addPoint(x, y) {
-        this.$.data.addPoint(x, y);
+      _draw(x, y) {
+        this.$.data.draw(x, y);
         var lastLine = this.$.data.lines[this.$.data.lines.length - 1];
         this._drawLine(lastLine.slice(lastLine.length - 4, lastLine.length));
       },
 
-      _endLine(x, y) {
-        this.$.data.endLine(x, y);
-        var lastLine = this.$.data.lines[this.$.data.lines.length - 1];
-        this._drawLine(lastLine.slice(lastLine.length - 4, lastLine.length));
+      _drawEnd() {
+        this.$.data.drawEnd();
+      },
+
+      _eraseStart() {
+        this.$.data.eraseStart();
       },
 
       _erase(x, y, px, py) {
         this.$.data.erase(x, y, px, py, 3);
+	this._render();
+      },
+
+      _eraseEnd() {
+        this.$.data.eraseEnd();
       },
 
       _drawLine(points) {

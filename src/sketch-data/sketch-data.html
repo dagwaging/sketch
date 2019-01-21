@@ -78,25 +78,27 @@
         this.pushHistory(action);
       },
 
+      // Private properties
+
+      _action: null,
+
       // Public functions
 
-      addLine: function(line) {
+      drawStart: function() {
         if(this.length < this.MAX_LENGTH) {
-          this._setLength(this.length + line.length * 2 + (this.lines.length == 0 ? 0 : 1));
-          this.push('lines', line);
+          this._setLength(this.length + (this.lines.length == 0 ? 0 : 1));
+          this.push('lines', []);
         }
       },
 
-      addPoint: function(x, y) {
+      draw: function(x, y) {
         if(this.length < this.MAX_LENGTH) {
           this.push('lines.' + (this.lines.length - 1), x, y);
           this._setLength(this.length + 4);
         }
       },
 
-      endLine: function(x, y) {
-        this.addPoint(x, y);
-
+      drawEnd: function() {
         var action = [{
           start: this.lines.length - 1,
           added: [this.lines[this.lines.length - 1]],
@@ -106,14 +108,43 @@
         this.pushHistory(action);
       },
 
-      erase: function(x, y, px, py, radius) {
-        // TODO
+      eraseStart: function() {
+        this._action = [];
       },
 
-      removeLine: function() {
-        if(this.lines.length > 0) {
-          var line = this.pop('lines');
-          this._setLength(this.length - line.length * 2 - (this.lines.length == 0 ? 0 : 1));
+      erase: function(x, y, px, py, radius) {
+        for(var i = 0; i < this.lines.length; i += 1) {
+          var line = this.lines[i];
+
+          for(var j = 0; j < line.length; j += 2) {
+            if(Math.pow(x - line[j], 2) + Math.pow(y - line[j + 1], 2) < Math.pow(radius, 2)) {
+              var first = line.slice(0, j);
+              var second = line.slice(j + 2);
+
+              var action = {
+                start: i,
+                added: [],
+                removed: [this.lines[i]]
+              };
+
+              if(first.length > 2) {
+                action.added.push(first);
+              }
+
+              if(second.length > 2) {
+                action.added.push(second);
+              }
+            }
+          }
+        }
+
+        this._doAction([action]);
+        this._action.push(action);
+      },
+
+      eraseEnd: function() {
+        if(this._action.length > 0) {
+          this.pushHistory(this._action);
         }
       },
 
@@ -154,7 +185,7 @@
       _undoAction: function(action) {
         var oldLength = this.lines.length;
 
-        for(var i in action) {
+        for(var i in action.reverse()) {
           Array.prototype.splice.apply(this.lines, [action[i].start, action[i].added.length].concat(action[i].removed));
 
           for(var j in action[i].added) {
