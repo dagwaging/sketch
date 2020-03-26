@@ -168,6 +168,14 @@
         target="[[target]]"
         keys="ctrl+enter"
         on-keys-pressed="_swap"></iron-a11y-keys>
+    <iron-a11y-keys
+        target="[[target]]"
+        keys="ctrl+c"
+        on-keys-pressed="_copy"></iron-a11y-keys>
+    <iron-a11y-keys
+        target="[[target]]"
+        keys="ctrl+v"
+        on-keys-pressed="_paste"></iron-a11y-keys>
 
     <sketch-api
         id="api"
@@ -325,6 +333,19 @@
 
       _save: function() {
         this.$.api.save(this.$.sketch.canvasData);
+      },
+
+      _copy: function() {
+        navigator.clipboard.writeText(this.$.sketch.data);
+      },
+
+      _paste: function() {
+        navigator.clipboard.readText()
+          .then(text => {
+            this.$.sketch.stop();
+            this.$.sketch.data = text;
+            this.sketchDisabled = false;
+          });
       }
     });
   </script>
