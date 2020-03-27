@@ -10,6 +10,7 @@
         @apply(--shadow-elevation-4dp);
         display: block;
         cursor: crosshair;
+        touch-action: none;
       }
 
       #sketchCanvas {
@@ -20,8 +21,15 @@
     </style>
     <canvas
         id="sketchCanvas"
-        on-track="_onTrack"
-        on-tap="_onTrack"
+        on-pointermove="_onPointerMove"
+        on-pointerenter="_onPointerMove"
+        on-pointerleave="_onPointerMove"
+        on-pointerover="_onPointerMove"
+        on-pointerout="_onPointerMove"
+        on-pointerdown="_onPointerMove"
+        on-pointerup="_onPointerMove"
+        on-pointercancel="_onPointerMove"
+        on-contextmenu="_onContextMenu"
         width="800"
         height="600"></canvas>
     <sketch-data
@@ -36,7 +44,6 @@
       is: 'sketch-canvas',
 
       ready: function() {
-        Polymer.Gestures.gestures.track.hasMovedEnough = function() { return true; };
         this._canvas = this.$.sketchCanvas.getContext("2d");
         this._canvas.strokeStyle = "black";
         this._canvas.lineWidth = 3;
@@ -114,6 +121,12 @@
 
       _bounds: null,
 
+      _wasPressed: null,
+
+      _lastX: null,
+
+      _lastY: null,
+
       // Public methods
 
       play: function() {
@@ -153,98 +166,60 @@
         this._bounds = this.getBoundingClientRect();
       },
 
-      _onTrack: function(event) {
+      _onContextMenu(event) {
+        event.preventDefault();
+      },
+
+      _onPointerMove(event) {
         event.preventDefault();
 
-        if(this.disabled) {
-          return;
-        }
-
-        event = this._fixInput(event);
-
-        if(event == null) {
-          return;
-        }
-
-        var point = this._scaleCoordinates(this._bounds, event.detail.x, event.detail.y, 800, 600);
+        var pressed = event.buttons == 1;
+        var point = this._scaleCoordinates(this._bounds, event.clientX, event.clientY, 800, 600);
         var x = point[0];
         var y = point[1];
 
-        var previousPoint = this._scaleCoordinates(this._bounds, event.detail.x - event.detail.ddx || 0, event.detail.y - event.detail.ddy || 0, 800, 600);
-        var px = previousPoint[0];
-        var py = previousPoint[1];
+        var isInBounds = x >= 0 && x < 800 && y >= 0 && y < 600;
+        var wasInBounds = this._lastX >= 0 && this._lastX < 800 && this._lastY >= 0 && this._lastY < 600;
 
-        if(this.erasing) {
-
-          if(event.type == 'tap' || event.type =='track' && event.detail.state == 'start') {
-            this._eraseStart();
+        if(isInBounds && pressed) {
+          if(wasInBounds && this._wasPressed) {
+            this._action().middle(x, y, this._lastX, this._lastY);
           }
-
-          if(event.type == 'tap' || event.type == 'track') {
-            this._erase(x, y, px, py);
-          }
-
-          if(event.type == 'tap' || event.type == 'track' && event.detail.state == 'end') {
-            this._eraseEnd();
+          else {
+            this._action().start(x, y);
           }
         }
         else {
-          if(event.type == 'tap' || event.type =='track' && event.detail.state == 'start') {
-            this._drawStart();
-          }
-
-          if(event.type == 'tap' || event.type == 'track') {
-            this._draw(x, y, px, py);
-
-            if(event.type == 'tap') {
-              this._draw(x, y, px, py);
-            }
-          }
-
-          if(event.type == 'tap' || event.type == 'track' && event.detail.state == 'end') {
-            this._drawEnd();
-          }
-        }
-      },
-
-      _fixInput: function(event) {
-        if(event.type == 'track') {
-          var x = event.detail.x;
-          var y = event.detail.y;
-
-          var dx = event.detail.ddx;
-          var dy = event.detail.ddy;
-
-          var px = x - dx;
-          var py = y - dy;
-
-          var isInBounds = this._contains(this._bounds, x, y);
-          var wasInBounds = this._contains(this._bounds, px, py);
-
-          if(isInBounds) {
-            if(!wasInBounds) {
-              event.detail.state = "start";
-              // TODO: insert additional 'start' event on border
-            }
-          }
-          else {
-            if(wasInBounds) {
-              event.detail.state = "end";
-              event.detail.x = px;
-              event.detail.y = py;
-              // TODO: move event to border
+          if(wasInBounds && this._wasPressed) {
+            if(isInBounds) {
+              this._action().end(x, y);
             }
             else {
-              event = null;
+              this._action().end(this._lastX, this._lastY);
             }
           }
         }
 
-        return event;
+        this._wasPressed = pressed;
+        this._lastX = x;
+        this._lastY = y;
       },
 
-      _contains: function(bounds, x, y) {
-        return x >= bounds.left && x <= bounds.right && y >= bounds.top && y <= bounds.bottom;
+      _action: function() {
+        if(this.erasing) {
+          return {
+            start: this._eraseStart.bind(this),
+            middle: this._erase.bind(this),
+            end: this._eraseEnd.bind(this)
+          }
+        }
+        else {
+          return {
+            start: this._drawStart.bind(this),
+            middle: this._draw.bind(this),
+            end: this._drawEnd.bind(this)
+          }
+        }
       },
 
       _scaleCoordinates: function(bounds, x, y, width, height) {
@@ -253,8 +228,9 @@
           return [x, y];
       },
 
-      _drawStart() {
+      _drawStart(x, y) {
         this.$.data.drawStart();
+        this._draw(x, y, x, y);
       },
 
       _draw(x, y) {
@@ -263,20 +239,23 @@
         this._drawLine(lastLine.slice(lastLine.length - 4, lastLine.length));
       },
 
-      _drawEnd() {
+      _drawEnd(x, y) {
+        this._draw(x, y, x, y);
         this.$.data.drawEnd();
       },
 
-      _eraseStart() {
+      _eraseStart(x, y) {
         this.$.data.eraseStart();
+        this._erase(x, y, x, y);
       },
 
       _erase(x, y, px, py) {
         this.$.data.erase(x, y, px, py, 3);
-	this._render();
+        this._render();
       },
 
-      _eraseEnd() {
+      _eraseEnd(x, y) {
+        this._erase(x, y, x, y);
         this.$.data.eraseEnd();
       },
 
