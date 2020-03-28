@@ -134,12 +134,12 @@
               if(second.length > 2) {
                 action.added.push(second);
               }
+
+              this._doAction([action]);
+              this._action.push(action);
             }
           }
         }
-
-        this._doAction([action]);
-        this._action.push(action);
       },
 
       eraseEnd: function() {
