@@ -137,6 +137,7 @@
 
               this._doAction([action]);
               this._action.push(action);
+              break;
             }
           }
         }
@@ -185,7 +186,7 @@
       _undoAction: function(action) {
         var oldLength = this.lines.length;
 
-        for(var i in action.reverse()) {
+        for(var i in action.slice(0).reverse()) {
           Array.prototype.splice.apply(this.lines, [action[i].start, action[i].added.length].concat(action[i].removed));
 
           for(var j in action[i].added) {
