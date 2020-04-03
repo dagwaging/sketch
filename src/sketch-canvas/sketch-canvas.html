@@ -47,8 +47,15 @@
         this._canvas = this.$.sketchCanvas.getContext("2d");
         this._canvas.strokeStyle = "black";
         this._canvas.lineWidth = 3;
-        this._canvas.lineJoin = "round";
-        this._canvas.lineCap = "round";
+        if(localStorage.getItem('beta')) {
+          this._canvas.lineJoin = "miter";
+          this._canvas.miterLimit = 10;
+          this._canvas.lineCap = "butt";
+        }
+        else {
+          this._canvas.lineJoin = "round";
+          this._canvas.lineCap = "round";
+        }
         this._canvas.fillStyle = "black";
       },
 
