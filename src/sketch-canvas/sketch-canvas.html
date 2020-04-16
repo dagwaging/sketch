@@ -17,6 +17,7 @@
         width: 100%;
         height: 100%;
         background: white;
+        touch-action: none;
       }
     </style>
     <canvas
@@ -178,6 +179,22 @@
       },
 
       _onPointerMove(event) {
+        let events = [];
+
+        if(event.getCoalescedEvents) {
+          events = event.getCoalescedEvents();
+        }
+
+        if(events.length == 0) {
+          events = [event];
+        }
+
+        for(let e of events) {
+          this._processEvent(e);
+        }
+      },
+
+      _processEvent(event) {
         event.preventDefault();
 
         var pressed = event.buttons == 1;
