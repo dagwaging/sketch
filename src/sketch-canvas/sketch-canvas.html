@@ -82,9 +82,20 @@
           readOnly: true,
           value: false
         },
+        eraseTool: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
+        eraseMode: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
         erasing: {
           type: Boolean,
           notify: true,
+          computed: '_isErasing(eraseTool, eraseMode)',
           value: false
         },
         disabled: {
@@ -197,7 +208,7 @@
       _processEvent(event) {
         event.preventDefault();
 
-        var pressed = event.buttons == 1;
+        var pressed = event.buttons > 0;
         var point = this._scaleCoordinates(this._bounds, event.clientX, event.clientY, 800, 600);
         var x = point[0];
         var y = point[1];
@@ -206,6 +217,7 @@
         var wasInBounds = this._lastX >= 0 && this._lastX < 800 && this._lastY >= 0 && this._lastY < 600;
 
         if(isInBounds && pressed) {
+          this.eraseMode = event.buttons == 32 || event.buttons == 2;
           if(wasInBounds && this._wasPressed) {
             this._action().middle(x, y, this._lastX, this._lastY);
           }
@@ -221,6 +233,7 @@
             else {
               this._action().end(this._lastX, this._lastY);
             }
+            this.eraseMode = event.buttons == 32 || event.buttons == 2;
           }
         }
 
@@ -344,6 +357,10 @@
 
       _canEdit(canEdit, disabled) {
         return canEdit && !disabled;
+      },
+
+      _isErasing(eraseTool, eraseMode) {
+        return eraseTool || eraseMode;
       }
     });
   })();
