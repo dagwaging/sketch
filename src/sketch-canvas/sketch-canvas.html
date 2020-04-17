@@ -257,10 +257,12 @@
         this._draw(x, y, x, y);
       },
 
-      _draw(x, y) {
-        this.$.data.draw(x, y);
-        var lastLine = this.$.data.lines[this.$.data.lines.length - 1];
-        this._drawLine(lastLine.slice(lastLine.length - 4, lastLine.length));
+      _draw(x, y, px, py) {
+        if(x != px || y != py) {
+          this.$.data.draw(x, y);
+          var lastLine = this.$.data.lines[this.$.data.lines.length - 1];
+          this._drawLine(lastLine.slice(lastLine.length - 4, lastLine.length));
+        }
       },
 
       _drawEnd(x, y) {
