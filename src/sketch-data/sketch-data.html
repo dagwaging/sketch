@@ -34,23 +34,59 @@
           type: Number,
           value: 65535,
           readOnly: true
+        },
+        hidden: {
+          type: Boolean,
+          value: false
         }
       },
 
       get data() {
-        var data = [];
+        if(this.hidden) {
+          var arrayBuffer = new ArrayBuffer(Math.max(0, this.lines.length - 1) + 2 * this.lines.reduce((sum, line) => sum + line.length, 0));
+          var data = new Uint8Array(arrayBuffer);
+          var n = 0;
 
-        for(var i = 0; i < this.lines.length; i++) {
-          var line = new Array(this.lines[i].length);
+          for(var i = 0; i < this.lines.length; i++) {
+            if(i > 0) {
+              n++;
+            }
 
-          for(var j in this.lines[i]) {
-            line[j] = this._pad(this.lines[i][j].toString(36), 2);
+            for(var j in this.lines[i]) {
+              var value = this.lines[i][j];
+              if(value < 73) {
+                var coordinate = this._pad(this.lines[i][j].toString(36), 2);
+                data[n] = coordinate.charCodeAt(0);
+                n++;
+                data[n] = coordinate.charCodeAt(1);
+                n++;
+              }
+              else {
+                data[n] = Math.floor((this.lines[i][j] - 73) / 36).toString(36).charCodeAt(0);
+                n++;
+                data[n] = 128 + (this.lines[i][j] - 73) % 36;
+                n++;
+              }
+            }
           }
 
-          data.push(line.join(""));
+          return arrayBuffer;
         }
+        else {
+          var data = [];
 
-        return data.join(" ");
+          for(var i = 0; i < this.lines.length; i++) {
+            var line = new Array(this.lines[i].length);
+
+            for(var j in this.lines[i]) {
+              line[j] = this._pad(this.lines[i][j].toString(36), 2);
+            }
+
+            data.push(line.join(""));
+          }
+
+          return data.join(" ");
+        }
       },
 
       set data(data) {
