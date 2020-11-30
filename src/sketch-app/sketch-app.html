@@ -137,6 +137,13 @@
           toggles
           on-tap="_erase"></paper-icon-button>
       <paper-icon-button
+          title="{{localize('move')}}"
+          icon="mdi:cursor-move"
+          disabled="{{_swapDisabled(sketchDisabled, loading)}}"
+          active="{{moving}}"
+          toggles
+          on-tap="_move"></paper-icon-button>
+      <paper-icon-button
           title="{{localize('pen')}}"
           icon="create"
           disabled="{{_swapDisabled(sketchDisabled, loading)}}"
@@ -199,6 +206,10 @@
         target="[[target]]"
         keys="e"
         on-keys-pressed="_erase"></iron-a11y-keys>
+    <iron-a11y-keys
+        target="[[target]]"
+        keys="m"
+        on-keys-pressed="_move"></iron-a11y-keys>
     <iron-a11y-keys
         target="[[target]]"
         keys="p"
@@ -362,6 +373,10 @@
 
       _draw: function() {
         this.$.sketch.eraseTool = false;
+      },
+
+      _move: function() {
+        // TODO
       },
 
       _reset: function() {
