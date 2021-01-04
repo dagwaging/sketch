@@ -126,11 +126,6 @@
       </div>
 
       <paper-icon-button
-          title="{{localize('peek')}}"
-          icon="visibility"
-          disabled="{{loading}}"
-          on-tap="_peek"></paper-icon-button>
-      <paper-icon-button
           title="{{localize('viewGallery')}}"
           icon="view-module"
           on-tap="_viewGallery"></paper-icon-button>
@@ -320,11 +315,6 @@
           this.$.sketch.$.data.clearHistory();
         }
         this.sketchDisabled = false;
-      },
-
-      _peek: function() {
-        this.$.api.peek();
-        this.sketchDisabled = true;
       },
 
       _viewGallery: function() {

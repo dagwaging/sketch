@@ -69,11 +69,6 @@
 
       // Public functions
 
-      peek: function() {
-        this.$.getMaxIDRequest.generateRequest();
-        this._setLoading(true);
-      },
-
       swap: function(data) {
         this.$.swapRequest.body = data;
         this.$.swapRequest.generateRequest();
