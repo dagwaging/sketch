@@ -303,9 +303,21 @@
         else {
           localStorage.removeItem('save' + tabID);
         }
+
+        var settings = {
+          timeResolution: this.$.sketch.timeResolution
+        };
+
+        localStorage.setItem('settings', JSON.stringify(settings));
       },
 
       _restoreData: function() {
+        var settings = JSON.parse(localStorage.getItem('settings'));
+
+        if(settings) {
+          this.$.sketch.timeResolution = settings.timeResolution;
+        }
+
         var save = JSON.parse(localStorage.getItem('save' + tabID));
 
         if(save) {
