@@ -7,6 +7,8 @@
 <link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../../bower_components/paper-slider/paper-slider.html">
+<link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../mdi/mdi.html">
 <link rel="import" href="../fit-ratio-container/fit-ratio-container.html">
@@ -25,6 +27,10 @@
       .content {
         flex-grow: 1;
         position: relative;
+      }
+
+      paper-toolbar .title {
+        margin: 0;
       }
 
       .title span {
@@ -60,6 +66,27 @@
 
       paper-icon-button[toggles]:not([active]) {
         color: var(--light-theme-disabled-color);
+      }
+
+      .settings {
+        font-family: 'Roboto', 'Noto', sans-serif;
+        font-size: 20px;
+        color: #000;
+        padding: 8px;
+        position: relative;
+        width: 256px;
+      }
+
+      .settings div {
+        margin: 8px;
+      }
+
+      paper-menu-button {
+        padding: 0;
+      }
+
+      paper-slider {
+        width: 100%;
       }
     </style>
 
@@ -115,6 +142,22 @@
           active="{{!erasing}}"
           toggles
           on-tap="_draw"></paper-icon-button>
+      <paper-menu-button
+          vertical-align="bottom"
+          vertical-offset="60">
+          <paper-icon-button
+              class="dropdown-trigger"
+              title="{{localize('settings')}}"
+              icon="settings"></paper-icon-button>
+          <div class="dropdown-content settings">
+              <div>Sample Rate (ms)</div>
+              <paper-slider
+                  value="{{timeResolution}}"
+                  max="50"
+                  min="0"
+                  editable></paper-slider>
+          </div>
+      </paper-menu-button>
 
       <div class="title">
         <span>{{localize('ink', 'amount', ink)}}</span>
