@@ -8,6 +8,7 @@
     "move": "Move",
     "pen": "Pen",
     "settings": "Settings",
+    "peek": "Peek",
     "viewGallery": "View gallery",
     "save": "Save",
     "ink": "{amount, number, percent} ink used",
