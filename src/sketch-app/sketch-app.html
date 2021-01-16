@@ -122,7 +122,7 @@
       <paper-icon-button
           title="{{localize('undo')}}"
           icon="undo"
-          disabled="{{_editDisabled(loading, canUndo)}}"
+          disabled="{{_undoDisabled(sketchDisabled, loading, canUndo, undoDisabled)}}"
           on-tap="_undo"></paper-icon-button>
       <paper-icon-button
           title="{{localize('redo')}}"
@@ -279,6 +279,10 @@
           type: Object,
           value: document.body
         },
+        undoDisabled: {
+          type: Boolean,
+          value: false
+        },
         language: {
           value: 'en'
         },
@@ -296,6 +300,10 @@
 
       _resetDisabled: function(sketchDisabled, loading, enabled) {
         return loading || (sketchDisabled ? false : !enabled);
+      },
+
+      _undoDisabled: function(sketchDisabled, loading, enabled, undoDisabled) {
+        return (sketchDisabled && !undoDisabled) ? false : (loading || !enabled);
       },
 
       _editDisabled: function(loading, enabled) {
@@ -351,7 +359,6 @@
 
       _onGet: function(data) {
         this.$.sketch.data = data.detail;
-        this.$.sketch.$.data.clearHistory();
         this.$.sketch.play();
       },
 
@@ -361,11 +368,20 @@
         if(!this.sketchDisabled) {
           this.$.api.swap(this.$.sketch.data);
           this.sketchDisabled = true;
+          this.undoDisabled = true;
         }
       },
 
       _undo: function() {
-        this.$.sketch.undo();
+        if(this.sketchDisabled) {
+          this.$.sketch.stop();
+          this.sketchDisabled = false;
+          this.$.sketch.undo();
+          this.$.sketch.$.data.history = this.$.sketch.$.data.history.slice(0, -1);
+        }
+        else {
+          this.$.sketch.undo();
+        }
       },
 
       _redo: function() {
@@ -386,16 +402,25 @@
 
       _reset: function() {
         this.$.sketch.stop();
+
+        if(this.sketchDisabled && !this.undoDisabled) {
+          this.sketchDisabled = false;
+          this.$.sketch.undo();
+          this.$.sketch.$.data.history = this.$.sketch.$.data.history.slice(0, -1);
+        }
+
         this.$.sketch.data = "";
-        if(this.sketchDisabled) {
+        if(this.sketchDisabled && this.undoDisabled) {
           this.$.sketch.$.data.clearHistory();
         }
         this.sketchDisabled = false;
+        this.undoDisabled = false;
       },
 
       _peek: function() {
         this.$.api.peek();
         this.sketchDisabled = true;
+        this.undoDisabled = false;
       },
 
       _viewGallery: function() {
