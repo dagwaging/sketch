@@ -186,6 +186,35 @@
         }
       },
 
+      moveStart: function() {
+        this._action = [{
+          start: 0,
+          removed: this.lines.map(line => line.map(i => i)),
+          added: this.lines.map(line => line.map(i => i))
+        }];
+      },
+
+      move: function(x, y, px, py) {
+        this._action[0].added = this.lines.map((line) => {
+          var moved = [];
+
+          for(var i = 0; i < line.length; i+= 2) {
+            moved[i] = line[i] + x - px;
+            moved[i + 1] = line[i + 1] + y - py;
+          }
+
+          return moved;
+        });
+
+        this._doAction(this._action);
+      },
+
+      moveEnd: function() {
+        if(this._action.length > 0) {
+          this.pushHistory(this._action);
+        }
+      },
+
       // Private functions
 
       _onUndo: function(event) {

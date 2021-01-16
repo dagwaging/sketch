@@ -140,7 +140,7 @@
           title="{{localize('move')}}"
           icon="mdi:cursor-move"
           disabled="{{_swapDisabled(sketchDisabled, loading)}}"
-          active="{{moving}}"
+          active="{{_isMoving(tool)}}"
           toggles
           on-tap="_move"></paper-icon-button>
       <paper-icon-button
@@ -376,7 +376,7 @@
       },
 
       _move: function() {
-        // TODO
+        this.$.sketch.desiredTool = 'move';
       },
 
       _reset: function() {
@@ -415,6 +415,10 @@
 
       _isDrawing: function(tool) {
         return tool === 'pen';
+      },
+
+      _isMoving: function(tool) {
+        return tool === 'move';
       }
     });
   </script>

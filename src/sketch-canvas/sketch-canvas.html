@@ -249,19 +249,25 @@
       },
 
       _action: function() {
-        if(this.tool === 'eraser') {
-          return {
-            start: this._eraseStart.bind(this),
-            middle: this._erase.bind(this),
-            end: this._eraseEnd.bind(this)
-          }
-        }
-        else {
-          return {
-            start: this._drawStart.bind(this),
-            middle: this._draw.bind(this),
-            end: this._drawEnd.bind(this)
-          }
+        switch(this.tool) {
+          case 'eraser':
+            return {
+              start: this._eraseStart.bind(this),
+              middle: this._erase.bind(this),
+              end: this._eraseEnd.bind(this)
+            }
+          case 'pen':
+            return {
+              start: this._drawStart.bind(this),
+              middle: this._draw.bind(this),
+              end: this._drawEnd.bind(this)
+            }
+          case 'move':
+            return {
+              start: this._moveStart.bind(this),
+              middle: this._move.bind(this),
+              end: this._moveEnd.bind(this)
+            }
         }
       },
 
@@ -302,6 +308,19 @@
       _eraseEnd(x, y) {
         this._erase(x, y, x, y);
         this.$.data.eraseEnd();
+      },
+
+      _moveStart() {
+        this.$.data.moveStart();
+      },
+
+      _move(x, y, px, py) {
+        this.$.data.move(x, y, px, py);
+        this._render();
+      },
+
+      _moveEnd() {
+        this.$.data.moveEnd();
       },
 
       _drawLine(points) {
