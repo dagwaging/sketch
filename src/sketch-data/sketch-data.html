@@ -206,7 +206,7 @@
           return moved;
         });
 
-        this._doAction(this._action);
+        this._setLines(this._action[0].added);
       },
 
       moveEnd: function() {
