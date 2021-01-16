@@ -58,6 +58,7 @@
           this._canvas.lineCap = "round";
         }
         this._canvas.fillStyle = "black";
+        this._activeTool = null;
       },
 
       behaviors: [
@@ -82,21 +83,15 @@
           readOnly: true,
           value: false
         },
-        eraseTool: {
-          type: Boolean,
-          notify: true,
-          value: false
+        desiredTool: {
+          type: String,
+          value: 'pen'
         },
-        eraseMode: {
-          type: Boolean,
+        tool: {
+          type: String,
           notify: true,
-          value: false
-        },
-        erasing: {
-          type: Boolean,
-          notify: true,
-          computed: '_isErasing(eraseTool, eraseMode)',
-          value: false
+          readOnly: true,
+          computed: '_tool(desiredTool, _activeTool)'
         },
         disabled: {
           type: Boolean,
@@ -224,7 +219,7 @@
         var wasInBounds = this._lastX >= 0 && this._lastX < 800 && this._lastY >= 0 && this._lastY < 600;
 
         if(isInBounds && pressed) {
-          this.eraseMode = event.buttons == 32 || event.buttons == 2;
+          this._activeTool = (event.buttons == 32 || event.buttons == 2) ? 'eraser' : null;
           if(wasInBounds && this._wasPressed) {
             if(this.timeResolution != 0 && Math.floor(event.timeStamp / this.timeResolution) - Math.floor(this._lastEventTimeStamp / this.timeResolution) == 0) {
               return;
@@ -243,7 +238,7 @@
             else {
               this._action().end(this._lastX, this._lastY);
             }
-            this.eraseMode = event.buttons == 32 || event.buttons == 2;
+            this._activeTool = (event.buttons == 32 || event.buttons == 2) ? 'eraser' : null;
           }
         }
 
@@ -254,7 +249,7 @@
       },
 
       _action: function() {
-        if(this.erasing) {
+        if(this.tool === 'eraser') {
           return {
             start: this._eraseStart.bind(this),
             middle: this._erase.bind(this),
@@ -370,8 +365,8 @@
         return canEdit && !disabled;
       },
 
-      _isErasing(eraseTool, eraseMode) {
-        return eraseTool || eraseMode;
+      _tool(desiredTool, activeTool) {
+        return activeTool ? activeTool : desiredTool;
       }
     });
   })();

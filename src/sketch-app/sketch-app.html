@@ -95,7 +95,7 @@
           <sketch-canvas
               id="sketch"
               ink="{{ink}}"
-              erasing="{{erasing}}"
+              tool="{{tool}}"
               can-undo="{{canUndo}}"
               can-redo="{{canRedo}}"
               time-resolution="{{timeResolution}}"
@@ -133,7 +133,7 @@
           title="{{localize('eraser')}}"
           icon="mdi:eraser-variant"
           disabled="{{_swapDisabled(sketchDisabled, loading)}}"
-          active="{{erasing}}"
+          active="{{_isErasing(tool)}}"
           toggles
           on-tap="_erase"></paper-icon-button>
       <paper-icon-button
@@ -147,7 +147,7 @@
           title="{{localize('pen')}}"
           icon="create"
           disabled="{{_swapDisabled(sketchDisabled, loading)}}"
-          active="{{!erasing}}"
+          active="{{_isDrawing(tool)}}"
           toggles
           on-tap="_draw"></paper-icon-button>
       <paper-menu-button
@@ -368,11 +368,11 @@
       },
 
       _erase: function() {
-        this.$.sketch.eraseTool = true;
+        this.$.sketch.desiredTool = 'eraser';
       },
 
       _draw: function() {
-        this.$.sketch.eraseTool = false;
+        this.$.sketch.desiredTool = 'pen';
       },
 
       _move: function() {
@@ -407,6 +407,14 @@
             this.$.sketch.data = text;
             this.sketchDisabled = false;
           });
+      },
+
+      _isErasing: function(tool) {
+        return tool === 'eraser';
+      },
+
+      _isDrawing: function(tool) {
+        return tool === 'pen';
       }
     });
   </script>
