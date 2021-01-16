@@ -210,6 +210,10 @@
       _processEvent(event) {
         event.preventDefault();
 
+        if(this.disabled) {
+          return;
+        }
+
         var pressed = event.buttons > 0;
         var point = this._scaleCoordinates(this._bounds, event.clientX, event.clientY, 800, 600);
         var x = point[0];
