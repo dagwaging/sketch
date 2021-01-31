@@ -224,13 +224,22 @@
 
         if(isInBounds && pressed) {
           this._activeTool = (event.buttons == 32 || event.buttons == 2) ? 'eraser' : null;
-          if(wasInBounds && this._wasPressed) {
-            if(this.timeResolution != 0 && Math.floor(event.timeStamp / this.timeResolution) - Math.floor(this._lastEventTimeStamp / this.timeResolution) == 0) {
-              return;
+          if(this._wasPressed) {
+            if(wasInBounds) {
+              if(this.timeResolution != 0 && Math.floor(event.timeStamp / this.timeResolution) - Math.floor(this._lastEventTimeStamp / this.timeResolution) == 0) {
+                return;
+              }
+              this._action().middle(x, y, this._lastX, this._lastY);
             }
-            this._action().middle(x, y, this._lastX, this._lastY);
+            else {
+              var intersection = this.$.data._intersections([[x, y], [this._lastX, this._lastY]], [[0, 0], [800, 600]]);
+              this._action().start(...intersection[0]);
+              this._action().middle(...intersection[0], this._lastX, this._lastY);
+              this._action().middle(x, y, ...intersection[0]);
+            }
           }
           else {
+            this.$.sketchCanvas.setPointerCapture(event.pointerId);
             this._action().start(x, y);
           }
         }
@@ -238,9 +247,12 @@
           if(wasInBounds && this._wasPressed) {
             if(isInBounds) {
               this._action().end(x, y);
+              this.$.sketchCanvas.releasePointerCapture(event.pointerId);
             }
             else {
-              this._action().end(this._lastX, this._lastY);
+              var intersection = this.$.data._intersections([[x, y], [this._lastX, this._lastY]], [[0, 0], [800, 600]]);
+              this._action().middle(...intersection[0], this._lastX, this._lastY);
+              this._action().end(...intersection[0]);
             }
             this._activeTool = (event.buttons == 32 || event.buttons == 2) ? 'eraser' : null;
           }
