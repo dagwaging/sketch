@@ -42,30 +42,32 @@
       },
 
       get data() {
+        var lines = this._clip(this.lines);
+
         if(this.hidden) {
-          var arrayBuffer = new ArrayBuffer(Math.max(0, this.lines.length - 1) + 2 * this.lines.reduce((sum, line) => sum + line.length, 0));
+          var arrayBuffer = new ArrayBuffer(Math.max(0, lines.length - 1) + 2 * lines.reduce((sum, line) => sum + line.length, 0));
           var data = new Uint8Array(arrayBuffer);
           var n = 0;
 
-          for(var i = 0; i < this.lines.length; i++) {
+          for(var i = 0; i < lines.length; i++) {
             if(i > 0) {
               data[n] = " ".charCodeAt(0);
               n++;
             }
 
-            for(var j in this.lines[i]) {
-              var value = this.lines[i][j];
+            for(var j in lines[i]) {
+              var value = lines[i][j];
               if(value < 73) {
-                var coordinate = this._pad(this.lines[i][j].toString(36), 2);
+                var coordinate = this._pad(lines[i][j].toString(36), 2);
                 data[n] = coordinate.charCodeAt(0);
                 n++;
                 data[n] = coordinate.charCodeAt(1);
                 n++;
               }
               else {
-                data[n] = Math.floor((this.lines[i][j] - 73) / 36).toString(36).charCodeAt(0);
+                data[n] = Math.floor((lines[i][j] - 73) / 36).toString(36).charCodeAt(0);
                 n++;
-                data[n] = 128 + (this.lines[i][j] - 73) % 36;
+                data[n] = 128 + (lines[i][j] - 73) % 36;
                 n++;
               }
             }
@@ -76,11 +78,11 @@
         else {
           var data = [];
 
-          for(var i = 0; i < this.lines.length; i++) {
-            var line = new Array(this.lines[i].length);
+          for(var i = 0; i < lines.length; i++) {
+            var line = new Array(lines[i].length);
 
-            for(var j in this.lines[i]) {
-              line[j] = this._pad(this.lines[i][j].toString(36), 2);
+            for(var j in lines[i]) {
+              line[j] = this._pad(Math.floor(lines[i][j]).toString(36), 2);
             }
 
             data.push(line.join(""));
@@ -275,6 +277,59 @@
 
       _pad: function(n, width) {
         return Math.pow(10, Math.max(0, width - n.length)).toString().substr(1) + n;
+      },
+
+      _clip: function(lines) {
+        let r = [[0, 0], [800, 600]];
+
+        return lines.flatMap((ln) => {
+          let nln = [[ln[0], ln[1]]];
+
+          for(let i = 2; i < ln.length; i += 2) {
+            nln.push(...this._intersections([ln.slice(i - 4, i - 2), ln.slice(i - 2, i)], r), ln.slice(i, i + 2));
+          }
+
+          let nlns = [];
+          let pp = null;
+
+          nln.forEach((p) => {
+            if(this._within(p, r)) {
+              if(pp === null || !this._within(pp, r)) {
+                nlns.push([]);
+              }
+
+              nlns[nlns.length - 1].push(...p);
+            }
+
+            pp = p;
+          });
+
+          return nlns;
+        });
+      },
+
+      _intersections: function(line, r) {
+        let i = [];
+        let lr = line[0][0] <= line[1][0] ? 1 : 0;
+        let ud = line[0][1] <= line[1][1] ? 1 : 0;
+
+        [[1 - lr, 0], [1 - ud, 1], [lr, 0], [ud, 1]].forEach(([n, flip]) => {
+          if(line[0][flip] < r[n][flip] != line[1][flip] < r[n][flip]) {
+            let p = [r[n][flip], line[0][1 - flip] + (line[1][1 - flip] - line[0][1 - flip]) * (r[n][flip] - line[0][flip]) / (line[1][flip] - line[0][flip])];
+            if(flip) {
+              p = p.reverse();
+            }
+            if(p[1 - flip] >= r[0][1 - flip] && p[1 - flip] < r[1][1 - flip]) {
+              i.push(p);
+            }
+          }
+        });
+
+        return i;
+      },
+
+      _within: function(point, rect) {
+        return point[0] >= rect[0][0] && point[0] <= rect[1][0] && point[1] >= rect[0][1] && point[1] <= rect[1][1];
       }
     });
   </script>
