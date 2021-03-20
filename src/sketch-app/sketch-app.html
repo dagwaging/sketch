@@ -432,7 +432,9 @@
       },
 
       _copy: function() {
-        navigator.clipboard.writeText(this.$.sketch.data);
+        if(!this.sketchDisabled) {
+          navigator.clipboard.writeText(this.$.sketch.data);
+        }
       },
 
       _paste: function() {
