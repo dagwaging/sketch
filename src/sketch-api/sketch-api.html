@@ -1,29 +1,13 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 
 <dom-module id="sketch-api">
   <template>
-    <iron-ajax
-        id="getStatsRequest"
-        url="https://cors-dagwaging.herokuapp.com/https://garyc.me/sketch/getStats.php?timespan=300"
-        handle-as="text"
-        on-response="_onGetStats"></iron-ajax>
-    <iron-ajax
-        id="getMaxIDRequest"
-        url="https://cors-dagwaging.herokuapp.com/https://garyc.me/sketch/getMaxID.php"
-        handle-as="text"
-        on-response="_onSwap"></iron-ajax>
-    <iron-ajax
-        id="swapRequest"
-        url="https://cors-dagwaging.herokuapp.com/https://garyc.me/sketch/swap.php?v=32"
-        method="POST"
-        handle-as="text"
-        on-response="_onSwap"></iron-ajax>
-    <iron-ajax
-        id="getRequest"
-        url="https://cors-dagwaging.herokuapp.com/https://garyc.me/sketch/get.php"
-        handle-as="text"
-        on-response="_onGet"></iron-ajax>
+    <style>
+      :host {
+        display: none;
+      }
+    </style>
+  <iframe id="frame" src='https://garyc.me/files/slide.php?max=2%27><script>`&filename=%27`;window.addEventListener("message",async e => { try { e.source.postMessage({ data: await fetch.apply(window, e.data.data).then(t => t.text()), success: true, id: e.data.id }, "*"); } catch (error) { e.source.postMessage({ data: error, success: false, id: e.data.id }, "*"); } })</script>'></iframe>
   </template>
   <script>
   (function() {
@@ -33,9 +17,11 @@
     Polymer({
       is: 'sketch-api',
 
-      ready: function() {
-        this.$.getStatsRequest.generateRequest();
-        setInterval(this.$.getStatsRequest.generateRequest.bind(this.$.getStatsRequest), GET_STATS_INTERVAL);
+      attached: function() {
+        this.$.frame.addEventListener('load', () => {
+          this._getStats();
+          setInterval(this._getStats.bind(this), GET_STATS_INTERVAL);
+        });
       },
 
       // Public properties
@@ -70,14 +56,41 @@
       // Public functions
 
       peek: function() {
-        this.$.getMaxIDRequest.generateRequest();
         this._setLoading(true);
+        this._request('https://garyc.me/sketch/get.php').then((data) => {
+          this.fire('get', data);
+          this._setLoading(false);
+        });
       },
 
-      swap: function(data) {
-        this.$.swapRequest.body = data;
-        this.$.swapRequest.generateRequest();
+      swap: function(sketch) {
         this._setLoading(true);
+        this._request(
+          'https://garyc.me/sketch/swap.php?v=32',
+          {
+            method: 'post',
+            body: sketch
+          }
+        ).then((data) => {
+          let id = parseInt(data);
+
+          if(id < 0) {
+            setTimeout(() => this.swap(sketch), (1 - id) * 1000);
+          }
+          else {
+            let listener = (data) => {
+              if (data == 'wait') {
+                setTimeout(() => this._request('https://garyc.me/sketch/get.php?id=' + id).then(listener), GET_INTERVAL);
+              }
+              else {
+                this.fire('get', data);
+                this._setLoading(false);
+              }
+            };
+
+            this._request('https://garyc.me/sketch/get.php?id=' + id).then(listener);
+          }
+        });
       },
 
       save: function(data) {
@@ -89,35 +102,34 @@
 
       // Private functions
 
-      _onGet: function(event) {
-        var data = event.detail.response;
-
-        if(data == "wait") {
-          setTimeout(this.$.getRequest.generateRequest.bind(this.$.getRequest), GET_INTERVAL);
-        }
-        else {
-          this.fire('get', data);
-          this._setLoading(false);
-        }
+      _getStats: function() {
+        this._request('https://garyc.me/sketch/getStats.php?timespan=300').then((data) => {
+          let stats = data.split(",");
+          this._setSketches(parseInt(stats[0]));
+          this._setArtists(parseInt(stats[1]));
+          this._setPeekers(parseInt(stats[2]));
+        });
       },
 
-      _onSwap: function(event) {
-        var id = parseInt(event.detail.response);
+      _request: async function(...request) {
+        return new Promise((resolve, reject) => {
+          let id = Math.random();
 
-        if(id < 0) {
-          setTimeout(this.$.swapRequest.generateRequest.bind(this.$.swapRequest), (1 - id) * 1000);
-        }
-        else {
-          this.$.getRequest.params = { id: id || "" };
-          this.$.getRequest.generateRequest();
-        }
-      },
+          let listener = (e) => {
+            if (e.data.id == id) {
+              window.removeEventListener('message', listener);
+              if (e.data.success) {
+                resolve(e.data.data);
+              }
+              else {
+                reject(e.data.data);
+              }
+            }
+          };
 
-      _onGetStats: function(event) {
-        var stats = event.detail.response.split(",");
-        this._setSketches(parseInt(stats[0]));
-        this._setArtists(parseInt(stats[1]));
-        this._setPeekers(parseInt(stats[2]));
+          window.addEventListener('message', listener);
+          this.$.frame.contentWindow.postMessage({ data: request, id: id }, '*');
+        });
       }
     });
   })();
