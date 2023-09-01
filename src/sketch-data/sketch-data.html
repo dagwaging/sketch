@@ -138,6 +138,11 @@
       },
 
       drawEnd: function() {
+        // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1449660
+        if(this.lines[this.lines.length - 1].length < 4) {
+          return;
+        }
+
         var action = [{
           start: this.lines.length - 1,
           added: [this.lines[this.lines.length - 1]],
